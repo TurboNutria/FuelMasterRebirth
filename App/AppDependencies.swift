@@ -3,6 +3,7 @@ import DomainLayer
 import Foundation
 import NetworkLayer
 import SwiftData
+import ViewModelLayer
 import WidgetKit
 
 /// Composition root: NetworkService → repositories → use cases (Bear note 06).
@@ -22,6 +23,10 @@ final class AppDependencies {
     let backfillHistory: BackfillHistory
     let resolveProvinces: ResolveProvinces
     let observeNearbyStations: ObserveNearbyStations
+    let observeConnectivity: ObserveConnectivity
+    let observeSettings: ObserveSettings
+    let updateSettings: UpdateSettings
+    let locateUser: LocateUser
 
     init() throws {
         cacheContainer = try PersistenceFactory.cacheContainer()
@@ -39,6 +44,27 @@ final class AppDependencies {
         backfillHistory = BackfillHistory(remote: remote, cache: localData)
         resolveProvinces = ResolveProvinces(provinces: localData)
         observeNearbyStations = ObserveNearbyStations(cache: localData, favorites: favorites)
+        observeConnectivity = ObserveConnectivity(connectivity: connectivity)
+        observeSettings = ObserveSettings(settings: localData)
+        updateSettings = UpdateSettings(settings: localData)
+        locateUser = LocateUser(location: location)
+    }
+
+    /// Created once and kept by the app, so screen state survives layout changes.
+    @MainActor func makeStationListViewModel() -> StationListViewModel {
+        StationListViewModel(
+            observeNearby: observeNearbyStations, refreshPrices: refreshPrices, resolveProvinces: resolveProvinces,
+            observeConnectivity: observeConnectivity, observeSettings: observeSettings,
+            updateSettings: updateSettings, locateUser: locateUser
+        )
+    }
+
+    @MainActor func makeMapViewModel() -> MapViewModel {
+        MapViewModel(
+            observeNearby: observeNearbyStations, refreshPrices: refreshPrices, resolveProvinces: resolveProvinces,
+            observeConnectivity: observeConnectivity, observeSettings: observeSettings,
+            updateSettings: updateSettings, locateUser: locateUser
+        )
     }
 }
 

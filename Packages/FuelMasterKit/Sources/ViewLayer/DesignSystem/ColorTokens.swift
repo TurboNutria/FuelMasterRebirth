@@ -7,6 +7,8 @@ public enum ColorTokens {
     public static let surface = Color(light: 0xFFFFFF, dark: 0x28283B)
     public static let cell = Color(light: 0xF2F2F2, dark: 0x494C5D)
     public static let separator = Color(light: 0xEFEFEF, dark: 0x40403F)
+    /// Outline of unselected filter chips.
+    public static let chipBorder = Color(light: 0xC9CCD3, dark: 0x5A5D6B)
     public static let textPrimary = Color(light: 0x1C1C1E, dark: 0xF2F2F7)
     public static let textSecondary = Color(light: 0x5B5F6B, dark: 0xA1A4B0)
     public static let open = Color(light: 0x1F7A3A, dark: 0x5BD07A)

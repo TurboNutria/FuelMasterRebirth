@@ -1,0 +1,72 @@
+import DomainLayer
+import Testing
+import ViewModelLayer
+
+@Suite("Layout mode")
+struct LayoutModeTests {
+    @Test func regularWidthIsSplit() {
+        // iPad, Mac, Pro Max landscape, open iPhone Duo.
+        #expect(LayoutMode(horizontalIsRegular: true, verticalIsCompact: false) == .split)
+        #expect(LayoutMode(horizontalIsRegular: true, verticalIsCompact: true) == .split)
+    }
+
+    @Test func compactHeightIsSideBySide() {
+        #expect(LayoutMode(horizontalIsRegular: false, verticalIsCompact: true) == .sideBySide)
+    }
+
+    @Test func compactWidthIsTabs() {
+        // Portrait iPhone, closed Duo, narrow iPad window.
+        #expect(LayoutMode(horizontalIsRegular: false, verticalIsCompact: false) == .tabs)
+    }
+
+    @Test func largeLayoutsDropTheMapTab() {
+        #expect(AppTab.tabs(for: .tabs) == [.map, .list, .favorites, .settings, .search])
+        #expect(AppTab.tabs(for: .split) == [.list, .favorites, .search, .settings])
+    }
+}
+
+@Suite("App router")
+@MainActor
+struct AppRouterTests {
+    let station = StationID("4375")
+
+    @Test func selectingAStationPresentsItsDetail() {
+        let router = AppRouter()
+        router.select(station)
+        #expect(router.isDetailPresented)
+        router.isDetailPresented = false
+        #expect(router.selectedStationID == nil)
+    }
+
+    @Test func mapTabGivesWayToTheListOnLargeScreens() {
+        let router = AppRouter(selectedTab: .map)
+        router.layoutDidChange(to: .split)
+        #expect(router.selectedTab == .list)
+        #expect(router.visibleTabs == [.list, .favorites, .search, .settings])
+    }
+
+    @Test func selectionSurvivesUnfoldingAndFolding() {
+        let router = AppRouter(selectedTab: .favorites)
+        router.select(station)
+        router.layoutDidChange(to: .split)
+        #expect(router.selectedStationID == station)
+        #expect(router.selectedTab == .favorites)
+        router.layoutDidChange(to: .tabs)
+        #expect(router.selectedStationID == station)
+        #expect(router.isDetailPresented)
+        #expect(router.selectedTab == .favorites)
+    }
+
+    @Test func backToTabsWithAStationOpenShowsGasolineras() {
+        let router = AppRouter(selectedTab: .search, layoutMode: .split)
+        router.select(station)
+        router.layoutDidChange(to: .tabs)
+        #expect(router.selectedTab == .list)
+    }
+
+    @Test func tabStaysWhenNothingIsSelected() {
+        let router = AppRouter(selectedTab: .settings, layoutMode: .split)
+        router.layoutDidChange(to: .tabs)
+        #expect(router.selectedTab == .settings)
+    }
+}

@@ -22,7 +22,10 @@ public enum ScreenState<Content: Sendable & Equatable>: Sendable, Equatable {
 }
 
 public enum EmptyReason: Sendable, Equatable {
-    case noStationsNearby(Product)
+    /// Nothing sells the product here; `nearest` is how far the closest one is, when known.
+    case noStationsNearby(Product, nearest: Double?)
+    /// Stations exist, but none at the chosen price level ("Caras").
+    case noStationsAtLevel(PriceLevel)
     case noFavorites
     case noSearchResults(String)
 }

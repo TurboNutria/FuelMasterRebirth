@@ -22,6 +22,10 @@ public struct BoundingBox: Hashable, Sendable, Codable {
         (minLatitude...maxLatitude).contains(point.latitude) && (minLongitude...maxLongitude).contains(point.longitude)
     }
 
+    public var center: Coordinate {
+        Coordinate(latitude: (minLatitude + maxLatitude) / 2, longitude: (minLongitude + maxLongitude) / 2)
+    }
+
     /// Grows the box by `degrees` on every side.
     public func expanded(by degrees: Double) -> BoundingBox {
         BoundingBox(minLatitude: minLatitude - degrees, minLongitude: minLongitude - degrees,

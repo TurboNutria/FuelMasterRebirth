@@ -24,7 +24,11 @@ let package = Package(
             resources: [.process("Resources")]
         ),
         .target(name: "ViewModelLayer", dependencies: ["DomainLayer"]),
-        .target(name: "ViewLayer", dependencies: ["ViewModelLayer", "DomainLayer"]),
+        .target(
+            name: "ViewLayer",
+            dependencies: ["ViewModelLayer", "DomainLayer"],
+            resources: [.process("Resources")]
+        ),
 
         .testTarget(name: "NetworkLayerTests", dependencies: ["NetworkLayer"]),
         .testTarget(name: "DomainLayerTests", dependencies: ["DomainLayer"]),
@@ -33,6 +37,7 @@ let package = Package(
             dependencies: ["DataLayer", "DomainLayer", "NetworkLayer"],
             resources: [.copy("Fixtures")]
         ),
+        .testTarget(name: "ViewModelLayerTests", dependencies: ["ViewModelLayer", "DomainLayer"]),
     ],
     swiftLanguageModes: [.v6]
 )

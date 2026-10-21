@@ -15,6 +15,11 @@ public struct ResolveProvinces: Sendable {
         await provinces.provinces(intersecting: viewport.bounds).sorted()
     }
 
+    /// Name and bounds of one province, e.g. the default one when location is denied.
+    public func province(_ id: ProvinceID) async -> Province? {
+        await provinces.allProvinces().first { $0.id == id }
+    }
+
     public func callAsFunction(around coordinate: Coordinate) async -> [ProvinceID] {
         let box = BoundingBox(minLatitude: coordinate.latitude, minLongitude: coordinate.longitude,
                               maxLatitude: coordinate.latitude, maxLongitude: coordinate.longitude)
