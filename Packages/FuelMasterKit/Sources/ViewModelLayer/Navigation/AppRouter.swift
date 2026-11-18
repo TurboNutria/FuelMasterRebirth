@@ -80,6 +80,16 @@ public final class AppRouter {
         selectedStationID = station
     }
 
+    /// A widget tap (`fuelmaster://station/<id>`). In tabs the detail pushes onto Gasolineras
+    /// unless a tab that shows stations is already open; elsewhere it opens beside the map.
+    @discardableResult
+    public func open(_ url: URL) -> Bool {
+        guard let station = StationLink.station(from: url) else { return false }
+        if layoutMode == .tabs, ![.list, .favorites, .search].contains(selectedTab) { selectedTab = .list }
+        selectedStationID = station
+        return true
+    }
+
     /// Rotating, unfolding the Duo or resizing a window swaps the root view; this keeps the
     /// selection meaningful in the new layout.
     public func layoutDidChange(to mode: LayoutMode) {

@@ -39,7 +39,11 @@ public final class MapViewModel {
     }
     /// Part of the request (for distances), so any change restarts the observation.
     public private(set) var userLocation: Coordinate? {
-        didSet { if userLocation != oldValue { observe() } }
+        didSet {
+            guard userLocation != oldValue else { return }
+            observe()
+            if let userLocation, let rememberArea { Task { await rememberArea(userLocation) } }
+        }
     }
     public private(set) var cameraMove: CameraMove?
     /// MapKit's user annotation asks for location by itself, so the map only adds it once allowed.
@@ -74,6 +78,7 @@ public final class MapViewModel {
     private let observeSettings: ObserveSettings
     private let updateSettings: UpdateSettings
     private let locateUser: LocateUser
+    private let rememberArea: RememberArea?
     private let clusterer = PinClusterer()
     private let settleDelay: Duration
     private let now: @Sendable () -> Date
@@ -81,7 +86,7 @@ public final class MapViewModel {
     public init(observeNearby: ObserveNearbyStations, refreshPrices: RefreshPrices,
                 resolveProvinces: ResolveProvinces, observeConnectivity: ObserveConnectivity,
                 observeSettings: ObserveSettings, updateSettings: UpdateSettings, locateUser: LocateUser,
-                settleDelay: Duration = .milliseconds(200),
+                rememberArea: RememberArea? = nil, settleDelay: Duration = .milliseconds(200),
                 now: @escaping @Sendable () -> Date = { .now }) {
         self.observeNearby = observeNearby
         self.refreshPrices = refreshPrices
@@ -90,6 +95,7 @@ public final class MapViewModel {
         self.observeSettings = observeSettings
         self.updateSettings = updateSettings
         self.locateUser = locateUser
+        self.rememberArea = rememberArea
         self.settleDelay = settleDelay
         self.now = now
     }

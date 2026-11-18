@@ -86,13 +86,14 @@ public final class StationListViewModel {
     private let observeSettings: ObserveSettings
     private let updateSettings: UpdateSettings
     private let locateUser: LocateUser
+    private let rememberArea: RememberArea?
     private let format: DisplayFormat
     private let now: @Sendable () -> Date
 
     public init(observeNearby: ObserveNearbyStations, refreshPrices: RefreshPrices,
                 resolveProvinces: ResolveProvinces, observeConnectivity: ObserveConnectivity,
                 observeSettings: ObserveSettings, updateSettings: UpdateSettings, locateUser: LocateUser,
-                toggleFavorite: ToggleFavorite,
+                toggleFavorite: ToggleFavorite, rememberArea: RememberArea? = nil,
                 format: DisplayFormat = DisplayFormat(), now: @escaping @Sendable () -> Date = { .now }) {
         self.toggleFavoriteUseCase = toggleFavorite
         self.observeNearby = observeNearby
@@ -102,6 +103,7 @@ public final class StationListViewModel {
         self.observeSettings = observeSettings
         self.updateSettings = updateSettings
         self.locateUser = locateUser
+        self.rememberArea = rememberArea
         self.format = format
         self.now = now
     }
@@ -201,6 +203,7 @@ public final class StationListViewModel {
     }
 
     private func use(location: Coordinate) async {
+        await rememberArea?(location)
         origin = location
         area = .radius(center: location, meters: Self.radius)
         scope = .nearby(radius: Self.radius)

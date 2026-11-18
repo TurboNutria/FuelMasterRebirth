@@ -37,6 +37,9 @@ final class AppDependencies {
     let searchStations: SearchStations
     let completeOnboarding: CompleteOnboarding
     let getDataSourceInfo: GetDataSourceInfo
+    let rememberArea: RememberArea
+    let refreshInBackground: RefreshInBackground
+    let getWidgetSnapshot: GetWidgetSnapshot
 
     init() throws {
         cacheContainer = try PersistenceFactory.cacheContainer()
@@ -68,7 +71,15 @@ final class AppDependencies {
                                         refreshPrices: refreshPrices)
         completeOnboarding = CompleteOnboarding(settings: localData)
         getDataSourceInfo = GetDataSourceInfo(cache: localData, provinces: localData)
+        rememberArea = RememberArea(settings: localData, provinces: localData)
+        refreshInBackground = RefreshInBackground(settings: localData, provinces: localData, favorites: favorites,
+                                                  refreshPrices: refreshPrices)
+        getWidgetSnapshot = GetWidgetSnapshot(settings: localData, provinces: localData, nearby: observeNearbyStations,
+                                              favorites: observeFavorites)
     }
+
+    /// Created on first use, by the window or by a background launch, whichever comes first.
+    static let shared = Result { try AppDependencies() }
 
     /// Every screen's view model, created once and kept by the app.
     @MainActor func makeViewModels() -> RootViewModels {
@@ -89,7 +100,8 @@ final class AppDependencies {
         StationListViewModel(
             observeNearby: observeNearbyStations, refreshPrices: refreshPrices, resolveProvinces: resolveProvinces,
             observeConnectivity: observeConnectivity, observeSettings: observeSettings,
-            updateSettings: updateSettings, locateUser: locateUser, toggleFavorite: toggleFavorite
+            updateSettings: updateSettings, locateUser: locateUser, toggleFavorite: toggleFavorite,
+            rememberArea: rememberArea
         )
     }
 
@@ -97,7 +109,7 @@ final class AppDependencies {
         MapViewModel(
             observeNearby: observeNearbyStations, refreshPrices: refreshPrices, resolveProvinces: resolveProvinces,
             observeConnectivity: observeConnectivity, observeSettings: observeSettings,
-            updateSettings: updateSettings, locateUser: locateUser
+            updateSettings: updateSettings, locateUser: locateUser, rememberArea: rememberArea
         )
     }
 }
@@ -123,6 +135,32 @@ extension AppDependencies {
             searchStations: searchStations, resolveProvinces: resolveProvinces, toggleFavorite: toggleFavorite,
             observeSettings: observeSettings, locateUser: locateUser
         )
+    }
+}
+
+extension AppDependencies {
+    /// Redraws the widgets when something they show changes in the app: the fuel, the price
+    /// scale, the accent, the remembered area or the favourites. New prices reload them from
+    /// `RefreshPrices`. Runs while the window is open.
+    func reloadWidgetsOnChanges() async {
+        let settingsChanges = await observeSettings()
+        let favoriteChanges = await favorites.changes()
+        let widgets = widgets
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                var last = await self.observeSettings.current()
+                for await settings in settingsChanges {
+                    let shown = { (s: DomainLayer.Settings) in
+                        [AnyHashable(s.product), s.priceScale, s.accent, s.lastLocation, s.defaultProvinceID]
+                    }
+                    if shown(settings) != shown(last) { widgets.reloadAll() }
+                    last = settings
+                }
+            }
+            group.addTask {
+                for await _ in favoriteChanges { widgets.reloadAll() }
+            }
+        }
     }
 }
 

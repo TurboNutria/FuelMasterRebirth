@@ -12,16 +12,49 @@
 		0000000000000000000C0002 /* DataLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0002 /* DataLayer */; };
 		0000000000000000000C0003 /* ViewModelLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0003 /* ViewModelLayer */; };
 		0000000000000000000C0004 /* ViewLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0004 /* ViewLayer */; };
+		0000000000000000000C0011 /* DomainLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0011 /* DomainLayer */; };
+		0000000000000000000C0012 /* DataLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0012 /* DataLayer */; };
+		0000000000000000000C0013 /* ViewModelLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0013 /* ViewModelLayer */; };
+		0000000000000000000C0014 /* ViewLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0014 /* ViewLayer */; };
+		0000000000000000000C0020 /* FuelMasterWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 000000000000000000000121 /* FuelMasterWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		000000000000000000000300 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000200000000;
+			remoteInfo = FuelMasterWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		000000000000000150000000 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				0000000000000000000C0020 /* FuelMasterWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* FuelMasterRebirth.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FuelMasterRebirth.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000000000000000121 /* FuelMasterWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FuelMasterWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		000000000000000000000010 /* App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = App;
+			sourceTree = "<group>";
+		};
+		000000000000000000000011 /* Widgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Widgets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -37,6 +70,15 @@
 				0000000000000000000C0004 /* ViewLayer in Frameworks */,
 			);
 		};
+		000000000000000230000000 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				0000000000000000000C0011 /* DomainLayer in Frameworks */,
+				0000000000000000000C0012 /* DataLayer in Frameworks */,
+				0000000000000000000C0013 /* ViewModelLayer in Frameworks */,
+				0000000000000000000C0014 /* ViewLayer in Frameworks */,
+			);
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -44,6 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000010 /* App */,
+				000000000000000000000011 /* Widgets */,
 				000000000000000000000020 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,6 +95,7 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000120 /* FuelMasterRebirth.app */,
+				000000000000000000000121 /* FuelMasterWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -66,8 +110,12 @@
 				000000000000000120000000 /* Sources */,
 				000000000000000130000000 /* Frameworks */,
 				000000000000000140000000 /* Resources */,
+				000000000000000150000000 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
+			);
+			dependencies = (
+				000000000000000000000310 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				000000000000000000000010 /* App */,
@@ -84,6 +132,30 @@
 			productReference = 000000000000000000000120 /* FuelMasterRebirth.app */;
 			productType = "com.apple.product-type.application";
 		};
+		000000000000000200000000 /* FuelMasterWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000210000000 /* Build configuration list for PBXNativeTarget "FuelMasterWidgets" */;
+			buildPhases = (
+				000000000000000220000000 /* Sources */,
+				000000000000000230000000 /* Frameworks */,
+				000000000000000240000000 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				000000000000000000000011 /* Widgets */,
+			);
+			name = FuelMasterWidgets;
+			packageProductDependencies = (
+				0000000000000000000B0011 /* DomainLayer */,
+				0000000000000000000B0012 /* DataLayer */,
+				0000000000000000000B0013 /* ViewModelLayer */,
+				0000000000000000000B0014 /* ViewLayer */,
+			);
+			productName = FuelMasterWidgets;
+			productReference = 000000000000000000000121 /* FuelMasterWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -96,6 +168,9 @@
 				TargetAttributes = {
 					000000000000000100000000 = {
 						CreatedOnToolsVersion = 26.3;
+					};
+					000000000000000200000000 = {
+						CreatedOnToolsVersion = 27.1;
 					};
 				};
 			};
@@ -118,12 +193,18 @@
 			projectRoot = "";
 			targets = (
 				000000000000000100000000 /* FuelMasterRebirth */,
+				000000000000000200000000 /* FuelMasterWidgets */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		000000000000000140000000 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		000000000000000240000000 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -136,7 +217,20 @@
 			files = (
 			);
 		};
+		000000000000000220000000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		000000000000000000000310 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 000000000000000200000000 /* FuelMasterWidgets */;
+			targetProxy = 000000000000000000000300 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		000000000000000011000000 /* Debug configuration for PBXProject "FuelMasterRebirth" */ = {
@@ -275,6 +369,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = Config/FuelMasterRebirth.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6UQAA233N7;
@@ -317,6 +412,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = Config/FuelMasterRebirth.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6UQAA233N7;
@@ -355,6 +451,66 @@
 			};
 			name = Release;
 		};
+		000000000000000211000000 /* Debug configuration for PBXNativeTarget "FuelMasterWidgets" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = Config/FuelMasterWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6UQAA233N7;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Widgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = FuelMaster;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.turbonutria.fuelmasterrebirth.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		000000000000000212000000 /* Release configuration for PBXNativeTarget "FuelMasterWidgets" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = Config/FuelMasterWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6UQAA233N7;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Widgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = FuelMaster;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.turbonutria.fuelmasterrebirth.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -371,6 +527,14 @@
 			buildConfigurations = (
 				000000000000000111000000 /* Debug configuration for PBXNativeTarget "FuelMasterRebirth" */,
 				000000000000000112000000 /* Release configuration for PBXNativeTarget "FuelMasterRebirth" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		000000000000000210000000 /* Build configuration list for PBXNativeTarget "FuelMasterWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000211000000 /* Debug configuration for PBXNativeTarget "FuelMasterWidgets" */,
+				000000000000000212000000 /* Release configuration for PBXNativeTarget "FuelMasterWidgets" */,
 			);
 			defaultConfigurationName = Release;
 		};
@@ -405,6 +569,26 @@
 			productName = ViewModelLayer;
 		};
 		0000000000000000000B0004 /* ViewLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
+			productName = ViewLayer;
+		};
+		0000000000000000000B0011 /* DomainLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
+			productName = DomainLayer;
+		};
+		0000000000000000000B0012 /* DataLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
+			productName = DataLayer;
+		};
+		0000000000000000000B0013 /* ViewModelLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
+			productName = ViewModelLayer;
+		};
+		0000000000000000000B0014 /* ViewLayer */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
 			productName = ViewLayer;

@@ -46,6 +46,9 @@ public struct Settings: Hashable, Sendable, Codable {
     /// Used when location access is denied.
     public var defaultProvinceID: ProvinceID?
     public var lastViewedProvinceID: ProvinceID?
+    /// Where the app last saw the user, for the widgets and background refresh, which can't ask
+    /// for a fix themselves. Stays on the device.
+    public var lastLocation: Coordinate?
     public var onboardingCompleted: Bool
 
     /// No real lower limit (motorbikes, small LPG tanks): just not zero, which has no cost to show.
@@ -66,7 +69,7 @@ public struct Settings: Hashable, Sendable, Codable {
 
     public init(product: Product, tankSize: Decimal, accent: AccentChoice, priceScale: PriceScale,
                 appearance: Appearance, defaultProvinceID: ProvinceID?, lastViewedProvinceID: ProvinceID?,
-                onboardingCompleted: Bool) {
+                onboardingCompleted: Bool, lastLocation: Coordinate? = nil) {
         self.product = product
         self.tankSize = tankSize
         self.accent = accent
@@ -74,6 +77,7 @@ public struct Settings: Hashable, Sendable, Codable {
         self.appearance = appearance
         self.defaultProvinceID = defaultProvinceID
         self.lastViewedProvinceID = lastViewedProvinceID
+        self.lastLocation = lastLocation
         self.onboardingCompleted = onboardingCompleted
     }
 }
