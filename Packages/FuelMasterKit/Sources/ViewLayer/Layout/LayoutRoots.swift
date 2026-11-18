@@ -41,17 +41,23 @@ struct SideBySideRootView: View {
     @Bindable var router: AppRouter
 
     var body: some View {
-        CollapsiblePanes(router: router, panelWidth: 320)
+        CollapsiblePanes(router: router, panelWidth: 320, detailInPane: false)
     }
 }
 
-/// The panel and the map as two plain panes, with the detail as a sheet. Hiding the panel clips it
-/// to nothing rather than removing it, so its scroll position and search text survive.
+/// The panel and the map as two plain panes. Hiding the panel clips it to nothing rather than
+/// removing it, so its scroll position and search text survive.
+///
+/// The detail opens as a sheet, or with `detailInPane` as a pane over the map's half (the open
+/// Duo, narrow iPad windows): the list stays usable beside it, so another row swaps the station
+/// without closing anything first.
 struct CollapsiblePanes: View {
     @Bindable var router: AppRouter
     let panelWidth: CGFloat
+    let detailInPane: Bool
 
     @State private var freeTopInset: CGFloat = 0
+    @State private var width: CGFloat = 0
 
     var body: some View {
         HStack(spacing: 0) {
@@ -64,16 +70,33 @@ struct CollapsiblePanes: View {
                 .ignoresSafeArea(.container, edges: freeTopInset > 0 ? .top : [])
             MapPane()
                 .environment(\.freeTopInset, freeTopInset)
+                .accessibilityHidden(detailCoversMap)
+        }
+        // The map's half even with the panel hidden, so part of the map stays in view.
+        .overlay(alignment: .trailing) {
+            if detailInPane {
+                DetailPaneOverlay(edge: .leading)
+                    .frame(width: max(0, width - panelWidth))
+            }
         }
         .background(ColorTokens.background)
         .onGeometryChange(for: CGFloat.self) { [panelWidth] proxy in
             Self.freeTopInset(in: proxy, panelWidth: panelWidth)
         } action: { freeTopInset = $0 }
-        .sheet(isPresented: router.detailBesideMapBinding) {
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+        .sheet(isPresented: detailSheetPresented) {
             // Always full height: at half height it showed little more than the name (QA 2026-11-11).
             NavigationStack { DetailPane(presentation: .sheet) }
                 .presentationDetents([.large])
         }
+    }
+
+    private var detailCoversMap: Bool {
+        detailInPane && router.presentsDetailBesideMap && !router.isPanelCollapsed
+    }
+
+    private var detailSheetPresented: Binding<Bool> {
+        detailInPane ? .constant(false) : router.detailBesideMapBinding
     }
 
     /// The unfolded Duo in portrait reserves about 78 pt across the top, but its status and camera
@@ -100,26 +123,29 @@ struct CollapsiblePanes: View {
     }
 }
 
-/// `.split` (iPad, Mac, open Duo): the map is always visible and the tabs switch the left panel.
+/// `.split` (iPad, Mac, open Duo): the map is always visible and the tabs switch the panel.
 ///
 /// Wide screens (iPad, Mac) use a NavigationSplitView with the detail in an inspector. Narrower
 /// regular-width screens (the open iPhone Duo, an iPad window in split screen) get two plain panes
-/// with the detail as a sheet: there, a 300 pt sidebar plus a 300 pt inspector don't fit, and
-/// UIKit's split-view solver ran out of memory and crashed (QA on the Duo, 2026-10-29). On a fold
-/// the panes meet at the hinge; system sheets keep clear of it.
+/// with the detail as a pane over the map's half: there, a 300 pt sidebar plus a 300 pt inspector
+/// don't fit, and UIKit's split-view solver ran out of memory and crashed (QA on the Duo,
+/// 2026-10-29). On a fold the panes meet at the hinge: side by side when it runs down the screen,
+/// stacked when the Duo is turned and it runs across.
 struct SplitRootView: View {
     /// Room for sidebar, inspector and some map (300 + 300 + 300).
     static let inspectorWidth: CGFloat = 900
 
     @Bindable var router: AppRouter
 
-    @State private var fold: CGRect?
+    @State private var fold: FoldLine?
     @State private var width: CGFloat = 0
 
     var body: some View {
         Group {
-            if usesTwoPanes {
-                CollapsiblePanes(router: router, panelWidth: panelWidth)
+            if let fold, fold.axis == .horizontal {
+                StackedPanes(router: router, fold: fold.frame)
+            } else if usesTwoPanes {
+                CollapsiblePanes(router: router, panelWidth: panelWidth, detailInPane: true)
             } else {
                 NavigationSplitView(columnVisibility: columnVisibility) {
                     PanelColumn(router: router)
@@ -152,34 +178,100 @@ struct SplitRootView: View {
 
     /// At the hinge when there is one, otherwise half, and never narrower than the list needs.
     private var panelWidth: CGFloat {
-        if let fold { return fold.minX }
+        if let fold, fold.axis == .vertical { return fold.frame.minX }
         return max(300, (width / 2).rounded())
     }
 }
 
-/// Where a vertical fold crosses this view (the open iPhone Duo's hinge), from the system's
-/// reserved regions. Nil on iOS 26 and on screens without one.
+/// The open Duo turned a quarter, with the fold running across (flat, or standing on a table): the
+/// map above the fold to look at, the panel below it to touch (Bear note 02, table pose). The
+/// detail opens over the map's half, so the list stays in reach. Hiding the panel gives the map
+/// the whole screen.
+struct StackedPanes: View {
+    @Bindable var router: AppRouter
+    /// The fold, in this view's space.
+    let fold: CGRect
+
+    @State private var height: CGFloat = 0
+
+    var body: some View {
+        VStack(spacing: 0) {
+            MapPane()
+                .frame(maxHeight: .infinity)
+                .accessibilityHidden(router.presentsDetailBesideMap && !router.isPanelCollapsed)
+                .overlay(alignment: .top) {
+                    DetailPaneOverlay(edge: .bottom)
+                        .frame(height: max(0, fold.minY))
+                }
+            PanelColumn(router: router)
+                // Clear of the fold itself while it's bent.
+                .padding(.top, fold.height)
+                .frame(height: panelHeight)
+                .frame(height: router.isPanelCollapsed ? 0 : panelHeight, alignment: .top)
+                .clipped()
+                .allowsHitTesting(!router.isPanelCollapsed)
+                .accessibilityHidden(router.isPanelCollapsed)
+        }
+        .background(ColorTokens.background)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
+    }
+
+    private var panelHeight: CGFloat { max(0, height - fold.minY) }
+}
+
+/// The detail as a pane of its own over the map's part of the screen, with a line on the `edge`
+/// it shares with the panel. Empty while no station is open.
+struct DetailPaneOverlay: View {
+    let edge: Edge
+
+    @Environment(AppRouter.self) private var router
+
+    var body: some View {
+        ZStack {
+            if router.presentsDetailBesideMap {
+                NavigationStack { DetailPane(presentation: .pane) }
+                    .overlay(alignment: Alignment(horizontal: edge == .leading ? .leading : .center,
+                                                  vertical: edge == .bottom ? .bottom : .center)) {
+                        ColorTokens.separator
+                            .frame(width: edge == .leading ? 1 : nil, height: edge == .bottom ? 1 : nil)
+                            .ignoresSafeArea()
+                            .allowsHitTesting(false)
+                    }
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: router.presentsDetailBesideMap)
+    }
+}
+
+/// Where the open iPhone Duo's fold crosses this view, from the system's reserved regions. Nil on
+/// iOS 26 and on screens without one.
 struct FoldReader: View {
-    @Binding var fold: CGRect?
+    @Binding var fold: FoldLine?
 
     var body: some View {
         Color.clear
-            .onGeometryChange(for: CGRect?.self) { proxy in
-                let local = proxy.frame(in: .local)
+            .onGeometryChange(for: FoldLine?.self) { proxy in
+                let size = proxy.size
                 #if DEBUG
                 // `-FMFakeFold YES` pretends there's a hinge down the middle, to try the open-Duo
-                // layout on an iPad simulator.
+                // layout on an iPad simulator; `-FMFakeFoldAcross YES` turns it a quarter.
                 if UserDefaults.standard.bool(forKey: "FMFakeFold") {
-                    return CGRect(x: local.midX, y: local.minY, width: 0, height: local.height)
+                    if UserDefaults.standard.bool(forKey: "FMFakeFoldAcross") {
+                        return FoldLine(frame: CGRect(x: 0, y: size.height / 2, width: size.width, height: 0),
+                                        axis: .horizontal)
+                    }
+                    return FoldLine(frame: CGRect(x: size.width / 2, y: 0, width: 0, height: size.height),
+                                    axis: .vertical)
                 }
                 #endif
                 #if os(iOS)
                 guard #available(iOS 27.1, *) else { return nil }
-                return proxy.reservedRegions(kind: .division)
+                // Inactive ones too: opened flat, the fold has no thickness but stays where it was,
+                // so bending and flattening the phone keeps the same layout.
+                let regions = proxy.reservedRegions(kind: .division, options: .includeInactive)
                     .map { (region: ReservedRegion) in region.frame }
-                    // A vertical hinge in the middle third: anything else (a horizontal fold, a
-                    // frame in an unexpected space) would make a broken column, so it's ignored.
-                    .first { $0.height > $0.width && $0.midX > local.width / 3 && $0.midX < local.width * 2 / 3 }
+                return FoldLine(regions: regions, in: size)
                 #else
                 return nil
                 #endif

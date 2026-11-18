@@ -8,7 +8,8 @@ public enum LayoutMode: String, Sendable {
     case tabs
     /// Standard iPhones in landscape: list and map side by side, detail as a sheet.
     case sideBySide
-    /// iPad, Mac, Plus / Pro Max landscape, open iPhone Duo: map always visible, detail in an inspector.
+    /// iPad, Mac, Plus / Pro Max landscape, open iPhone Duo: map always visible, detail beside it
+    /// (an inspector on wide screens, a pane over the map's half on narrower ones).
     case split
 
     public init(horizontalIsRegular: Bool, verticalIsCompact: Bool) {

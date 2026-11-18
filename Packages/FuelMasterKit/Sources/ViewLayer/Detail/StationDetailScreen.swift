@@ -5,11 +5,13 @@ import SwiftUI
 import ViewModelLayer
 
 /// Where the detail is shown (Bear note 02): pushed in the tabs layout, a sheet side by side,
-/// an inspector in split. Pushed screens get the system back button; the others a close button.
+/// an inspector in a wide split, and a pane over the map's half in a narrow one (the open Duo).
+/// Pushed screens get the system back button; the others a close button.
 enum DetailPresentation {
     case push
     case sheet
     case inspector
+    case pane
 }
 
 /// Detalle de estación (canvas: "Detalle de estación" and the iPad inspector): name and hours,
@@ -132,7 +134,7 @@ struct StationDetailScreen: View {
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
         // A leading item in the inspector would land on the map's toolbar, so it closes from the
         // trailing group there; the sheet keeps the usual leading close button.
-        if presentation == .sheet {
+        if presentation == .sheet || presentation == .pane {
             ToolbarItem(placement: .cancellationAction) { closeButton }
         }
         if presentation == .inspector, viewModel.state.content == nil {
