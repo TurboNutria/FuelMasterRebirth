@@ -70,3 +70,68 @@ struct AppRouterTests {
         #expect(router.selectedTab == .settings)
     }
 }
+
+@Suite("Detail placement")
+@MainActor
+struct DetailPlacementTests {
+    let station = StationID("3213")
+
+    @Test func tabsPushOnTheSelectedTabOnly() {
+        let router = AppRouter(selectedTab: .favorites, layoutMode: .tabs)
+        router.select(station)
+        #expect(router.pushesDetail(on: .favorites))
+        #expect(!router.pushesDetail(on: .list))
+        #expect(!router.presentsDetailBesideMap)
+    }
+
+    @Test func splitOpensOverTheMapAndKeepsThePanelsTab() {
+        let router = AppRouter(selectedTab: .settings, layoutMode: .split)
+        router.select(station)
+        #expect(router.presentsDetailBesideMap)
+        #expect(!router.pushesDetail(on: .settings))
+        #expect(router.selectedTab == .settings)
+    }
+
+    @Test func sideBySideUsesASheet() {
+        let router = AppRouter(selectedTab: .list, layoutMode: .sideBySide)
+        router.select(station)
+        #expect(router.presentsDetailBesideMap)
+        #expect(!router.pushesDetail(on: .list))
+    }
+}
+
+@Suite("List panel")
+@MainActor
+struct ListPanelTests {
+    @Test func collapsingHidesThePanelAndGivesTheMapItsMenus() {
+        let router = AppRouter(selectedTab: .list, layoutMode: .sideBySide)
+        #expect(router.showsPanel)
+        #expect(!router.showsMapMenus)
+
+        router.isPanelCollapsed = true
+        #expect(!router.showsPanel)
+        #expect(router.showsMapMenus)
+    }
+
+    @Test func tabsHaveNoPanelAndTheMapKeepsItsMenus() {
+        let router = AppRouter(selectedTab: .map, layoutMode: .tabs)
+        #expect(!router.showsPanel)
+        #expect(router.showsMapMenus)
+    }
+
+    @Test func collapsedSurvivesTheLayoutChanging() {
+        let router = AppRouter(selectedTab: .list, layoutMode: .sideBySide)
+        router.isPanelCollapsed = true
+        router.layoutDidChange(to: .tabs)
+        router.layoutDidChange(to: .split)
+        #expect(router.isPanelCollapsed)
+        #expect(!router.showsPanel)
+    }
+
+    @Test func aStationStillOpensOverTheCollapsedMap() {
+        let router = AppRouter(selectedTab: .list, layoutMode: .split)
+        router.isPanelCollapsed = true
+        router.select(StationID("3213"))
+        #expect(router.presentsDetailBesideMap)
+    }
+}

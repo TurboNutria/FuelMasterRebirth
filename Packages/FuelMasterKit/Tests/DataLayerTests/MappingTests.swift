@@ -91,4 +91,19 @@ struct ValueTests {
         #expect(calendar.dateComponents([.hour, .minute, .day], from: date) == DateComponents(day: 20, hour: 17, minute: 28))
         #expect(MinistryDates.parse("19/10/2026 0:00:00") != nil)
     }
+
+    @Test func petrolCoversItsE10Blend() throws {
+        let base = ["IDEESS": "1", "Rótulo": "TEST", "Latitud": "40,4169", "Longitud (WGS84)": "-3,7035", "Tipo Venta": "P"]
+        let onlyE10 = try #require(StationMapper.station(from: StationDTO(fields: base.merging(
+            ["Precio Gasolina 95 E10": "1,599"]) { $1 })))
+        #expect(onlyE10.price(for: .petrol95E5)?.amount == Decimal(string: "1.599"))
+        let both = try #require(StationMapper.station(from: StationDTO(fields: base.merging(
+            ["Precio Gasolina 95 E5": "1,649", "Precio Gasolina 95 E10": "1,599"]) { $1 })))
+        #expect(both.price(for: .petrol95E5)?.amount == Decimal(string: "1.649"))
+    }
+
+    @Test func savedE10ChoicesReadAsPlainPetrol() throws {
+        let products = try JSONDecoder().decode([Product].self, from: Data("[23, 21, 4]".utf8))
+        #expect(products == [.petrol95E5, .petrol98E5, .diesel])
+    }
 }

@@ -24,7 +24,8 @@ struct FormattingTests {
 
     @Test func metricDistances() {
         #expect(spanish.distance(meters: 1400) == "1,4 km")
-        #expect(spanish.distance(meters: 3000) == "3 km")
+        #expect(spanish.distance(meters: 3000) == "3,0 km")
+        #expect(spanish.radius(meters: 3000) == "3 km")
         #expect(spanish.distance(meters: 847) == "850 m")
         #expect(spanish.distance(meters: 3) == "10 m")
         #expect(spanish.distance(meters: 152_300) == "152 km")

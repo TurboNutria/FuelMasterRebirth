@@ -18,9 +18,9 @@ enum StationMapper {
             }
         } else {
             for product in Product.allCases {
-                if let amount = MinistryNumbers.decimal(dto[ProductFields.priceKey(for: product)]) {
-                    prices[product] = Price(amount: amount, product: product)
-                }
+                let amount = MinistryNumbers.decimal(dto[ProductFields.priceKey(for: product)])
+                    ?? ProductFields.fallbackPriceKey(for: product).flatMap { MinistryNumbers.decimal(dto[$0]) }
+                if let amount { prices[product] = Price(amount: amount, product: product) }
             }
         }
 

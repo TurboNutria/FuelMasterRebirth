@@ -11,53 +11,31 @@ public struct MapScreen: View {
 
     @Environment(AppRouter.self) private var router
     @Environment(\.displayFormat) private var format
-    @State private var position: MapCameraPosition = .automatic
-    @State private var width: Double = 390
-
+    @Environment(\.freeTopInset) private var freeTopInset
     public init(viewModel: MapViewModel) {
         self.viewModel = viewModel
     }
 
     public var body: some View {
-        Map(position: $position) {
-            UserAnnotation()
-            ForEach(pins) { pin in
-                Annotation("", coordinate: pin.coordinate.location, anchor: .bottom) {
-                    Button {
-                        tap(pin)
-                    } label: {
-                        MapPinView(pin: pin, isHighlighted: isHighlighted(pin))
-                    }
-                    .buttonStyle(.plain)
-                }
-                .annotationTitles(.hidden)
+        // The controls stay inside the safe area; only the map runs under it.
+        Color.clear
+            .background {
+                PinMap(pins: pins, highlightedID: router.selectedStationID, cameraMove: viewModel.cameraMove,
+                       showsUserLocation: viewModel.showsUserLocation,
+                       onViewportChange: { viewport, width, distance in
+                           viewModel.viewportChanged(viewport, width: width, distance: distance)
+                       },
+                       onTap: tap)
+                    .ignoresSafeArea()
             }
-        }
-        .mapStyle(.standard(pointsOfInterest: .excludingAll))
-        .mapControls {}
-        .onMapCameraChange(frequency: .onEnd) { context in
-            viewModel.viewportChanged(MapViewport(context.region), width: width)
-        }
-        .onGeometryChange(for: Double.self) { $0.size.width } action: { width = $0 }
-        .onChange(of: viewModel.cameraMove, initial: true) { _, move in
-            guard let move else { return }
-            withAnimation { position = .region(move.viewport.region) }
-        }
-        .overlay(alignment: .top) { topControls }
-        .overlay(alignment: .bottom) { bottomStack }
-        .task { await viewModel.start() }
+            .overlay(alignment: .top) { topControls }
+            .overlay(alignment: .bottom) { bottomStack }
+            .task { await viewModel.start() }
     }
 
     private var pins: [StationPin] {
         if case .firstLoad = viewModel.state { return viewModel.placeholderPins }
         return viewModel.state.content?.pins ?? []
-    }
-
-    /// The selected station, or else the cheapest nearby (which is never grouped).
-    private func isHighlighted(_ pin: StationPin) -> Bool {
-        guard case .station(let summary) = pin else { return false }
-        return summary.id == router.selectedStationID
-            || (router.selectedStationID == nil && summary.id == viewModel.state.content?.cheapest?.summary.id)
     }
 
     private func tap(_ pin: StationPin) {
@@ -71,42 +49,65 @@ public struct MapScreen: View {
     // MARK: Overlays
 
     private var topControls: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                MapFuelMenu(product: viewModel.product) { product in
-                    Task { await viewModel.select(product) }
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
+                Group {
+                    if !router.layoutMode.hasMapTab { panelButton }
+                    if router.showsMapMenus {
+                        MapFuelMenu(product: viewModel.product, products: viewModel.offeredProducts) { product in
+                            Task { await viewModel.select(product) }
+                        }
+                        MapLevelMenu(selection: $viewModel.levelFilter)
+                    } else {
+                        // A filter set before the list came back still applies, so it stays visible.
+                        if viewModel.levelFilter != .all { MapLevelMenu(selection: $viewModel.levelFilter) }
+                        // With the list beside the map its fuel and filters are already on screen,
+                        // so the pill takes their place instead of floating below.
+                        statusPill
+                    }
                 }
-                MapLevelMenu(selection: $viewModel.levelFilter)
-                Spacer()
+                .offset(y: -leftControlsLift)
+                Spacer(minLength: 8)
                 GlassIconButton(systemImage: "location.fill", label: Text("Centrar en mi ubicación", bundle: .module)) {
                     Task { await viewModel.centerOnUser() }
                 }
             }
-            statusPill
+            if router.showsMapMenus { statusPill.offset(y: -leftControlsLift) }
         }
         .padding(.horizontal, 16)
         .padding(.top, 8)
     }
 
-    /// «Actualizado hace 12 min · media 1,924 €», «Cargando precios…» or the zoom hint.
+    /// How far the left-hand controls rise into free space, ending 16 pt from the top like the
+    /// panel's tab switcher. The location button stays below the status corner.
+    private var leftControlsLift: CGFloat {
+        freeTopInset > 0 ? max(0, freeTopInset - 8) : 0
+    }
+
+    /// Hides or brings back the list panel.
+    private var panelButton: some View {
+        GlassIconButton(systemImage: "sidebar.left",
+                        label: router.isPanelCollapsed ? Text("Mostrar lista", bundle: .module) : Text("Ocultar lista", bundle: .module)) {
+            withAnimation { router.isPanelCollapsed.toggle() }
+        }
+    }
+
+    /// «Cargando precios…» or the zoom hint. Nothing once prices are on the map.
     @ViewBuilder private var statusPill: some View {
         let text: String? = if viewModel.isZoomedOut {
             String(localized: "Acerca el mapa para ver los precios", bundle: .module)
         } else if case .firstLoad = viewModel.state {
             String(localized: "Cargando precios…", bundle: .module)
-        } else if let content = viewModel.state.content, let date = content.pricesDate {
-            [String(localized: "Actualizado \(format.relativeTimeInSentence(date, now: .now))", bundle: .module),
-             content.average.map { String(localized: "media \(format.priceWithCurrency($0))", bundle: .module) }]
-                .compactMap { $0 }.joined(separator: " · ")
         } else {
             nil
         }
         if let text {
             Text(text)
                 .font(.caption)
+                .lineLimit(1)
                 .foregroundStyle(ColorTokens.textSecondary)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
                 .glassEffect(.regular, in: .capsule)
         }
     }
@@ -119,10 +120,6 @@ public struct MapScreen: View {
                     viewModel.dismissOfflinePill()
                 }
             }
-            if let cheapest = viewModel.state.content?.cheapest {
-                CheapestCard(cheapest: cheapest) { router.select(cheapest.summary.id) }
-                    .padding(.horizontal, 12)
-            }
         }
         .padding(.bottom, 12)
     }
@@ -131,20 +128,16 @@ public struct MapScreen: View {
 /// Fuel menu on the map: white glass with dark text, as on the canvas.
 struct MapFuelMenu: View {
     let product: Product
+    let products: [Product]
     let onSelect: (Product) -> Void
 
     var body: some View {
         Menu {
-            ForEach(Product.allCases) { option in
-                Button {
-                    onSelect(option)
-                } label: {
-                    if option == product {
-                        Label { Text(option.displayName) } icon: { Image(systemName: "checkmark") }
-                    } else {
-                        Text(option.displayName)
-                    }
-                }
+            // A picker, so the system draws the tick in its own column and the names stay aligned.
+            Picker(selection: Binding(get: { product }, set: onSelect)) {
+                ForEach(products) { Text($0.displayName).tag($0) }
+            } label: {
+                Text("Combustible", bundle: .module)
             }
         } label: {
             HStack(spacing: 6) {
@@ -170,13 +163,11 @@ struct MapLevelMenu: View {
                 Text("Filtro de precio", bundle: .module)
             }
         } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "line.3.horizontal.decrease")
-                selection.title.lineLimit(1)
-            }
+            FilterIcon(isActive: selection != .all)
         }
         .mapControlMenu()
         .accessibilityLabel(Text("Filtro de precio", bundle: .module))
+        .accessibilityValue(selection.title)
     }
 }
 
@@ -192,116 +183,11 @@ extension View {
     }
 }
 
-/// "La más barata cerca": name, hours and distance, the big price and its gap to the average,
-/// with "Cómo llegar" and "Ver detalle".
-struct CheapestCard: View {
-    let cheapest: CheapestNearby
-    let onDetail: () -> Void
-
-    @Environment(\.displayFormat) private var format
-    @Environment(\.accentColors) private var accent
-    @Environment(\.priceScale) private var scale
-
-    var body: some View {
-        let summary = cheapest.summary
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("La más barata cerca", bundle: .module)
-                    .font(.footnote.weight(.semibold))
-                    .textCase(.uppercase)
-                    .kerning(0.5)
-                Spacer()
-                Text(format.distance(meters: cheapest.radius))
-                    .font(.footnote)
-            }
-            .foregroundStyle(ColorTokens.textSecondary)
-
-            HStack(spacing: 12) {
-                BrandBadge(summary.station.initials)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(summary.station.name)
-                        .font(.headline)
-                        .foregroundStyle(ColorTokens.textPrimary)
-                    HStack(spacing: 0) {
-                        HoursLabel(cheapest.hours).layoutPriority(2)
-                        Group {
-                            if let distance = summary.distance { Text(verbatim: " · \(format.distance(meters: distance))").layoutPriority(1) }
-                            Text(verbatim: " · \(summary.station.address.street)")
-                        }
-                        .foregroundStyle(ColorTokens.textSecondary)
-                    }
-                    .font(.footnote)
-                    .lineLimit(1)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                VStack(alignment: .trailing, spacing: 0) {
-                    Text(format.price(summary.price.amount))
-                        .font(.system(.title, design: .rounded, weight: .heavy))
-                        .monospacedDigit()
-                        .foregroundStyle(priceColor)
-                    if let gap = gapText {
-                        Text(gap)
-                            .font(.caption)
-                            .foregroundStyle(ColorTokens.textSecondary)
-                    }
-                }
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(spokenText)
-
-            HStack(spacing: 8) {
-                Button {
-                    openDirections()
-                } label: {
-                    Text("Cómo llegar", bundle: .module)
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(accent.onFill)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.glassProminent)
-                .tint(accent.fill)
-                .controlSize(.large)
-
-                Button(action: onDetail) {
-                    Text("Ver detalle", bundle: .module)
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(accent.tint)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.glass)
-                .controlSize(.large)
-            }
-        }
-        .padding(16)
-        .glassEffect(.regular, in: .rect(cornerRadius: 28))
-    }
-
-    /// Cheap prices in their scale colour; average and expensive ones stay dark so they read on glass.
-    private var priceColor: Color {
-        cheapest.summary.level == .cheap
-            ? PriceLevelColors.colors(for: .cheap, scale: scale).background
-            : ColorTokens.textPrimary
-    }
-
-    private var gapText: String? {
-        guard let gap = cheapest.belowAverage else { return nil }
-        let amount = format.priceWithCurrency(abs(gap))
-        if gap > 0 { return String(localized: "\(amount) bajo la media", bundle: .module) }
-        if gap < 0 { return String(localized: "\(amount) sobre la media", bundle: .module) }
-        return String(localized: "En la media", bundle: .module)
-    }
-
-    /// «La más barata cerca: Ballenoil, 1,859 euros, 0,065 euros bajo la media.»
-    private var spokenText: String {
-        let price = format.priceWithCurrency(cheapest.summary.price.amount)
-        let parts = [cheapest.summary.station.name, price, gapText].compactMap { $0 }.joined(separator: ", ")
-        return String(localized: "La más barata cerca: \(parts)", bundle: .module)
-    }
-
-    private func openDirections() {
-        let coordinate = cheapest.summary.station.coordinate
+extension Station {
+    /// "Cómo llegar": Apple Maps with driving directions to the station.
+    func openDirections() {
         let item = MKMapItem(location: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude), address: nil)
-        item.name = cheapest.summary.station.name
+        item.name = name
         item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
     }
 }

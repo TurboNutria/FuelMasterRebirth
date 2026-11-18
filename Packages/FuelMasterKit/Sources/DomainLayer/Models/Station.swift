@@ -68,12 +68,6 @@ public struct Station: Hashable, Sendable, Identifiable {
         self.prices = prices
     }
 
-    /// Two-letter tile shown instead of a brand logo ("BA", "RE").
-    public var initials: String {
-        let letters = name.filter(\.isLetter)
-        return String(letters.prefix(2)).uppercased()
-    }
-
     public func price(for product: Product) -> Price? { prices[product] }
 }
 

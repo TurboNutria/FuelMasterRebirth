@@ -42,15 +42,22 @@ enum ProductFields {
         case .diesel: "Precio Gasoleo A"
         case .dieselPremium: "Precio Gasoleo Premium"
         case .petrol95E5: "Precio Gasolina 95 E5"
-        case .petrol95E10: "Precio Gasolina 95 E10"
         case .petrol95Premium: "Precio Gasolina 95 E5 Premium"
         case .petrol98E5: "Precio Gasolina 98 E5"
-        case .petrol98E10: "Precio Gasolina 98 E10"
         case .lpg: "Precio Gases licuados del petróleo"
         case .cng: "Precio Gas Natural Comprimido"
         case .lng: "Precio Gas Natural Licuado"
         case .renewableDiesel: "Precio Diésel Renovable"
         case .adBlue: "Precio Adblue"
+        }
+    }
+
+    /// Read when the main key is empty: the E10 blend of the same petrol.
+    static func fallbackPriceKey(for product: Product) -> String? {
+        switch product {
+        case .petrol95E5: "Precio Gasolina 95 E10"
+        case .petrol98E5: "Precio Gasolina 98 E10"
+        default: nil
         }
     }
 }

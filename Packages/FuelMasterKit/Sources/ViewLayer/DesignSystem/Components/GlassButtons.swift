@@ -37,12 +37,13 @@ public struct GlassIconButton: View {
     public var body: some View {
         Button(action: action) {
             Image(systemName: systemImage)
-                .font(.title3.weight(.semibold))
+                .font(.body.weight(.semibold))
                 .foregroundStyle(accent.tint)
-                .frame(width: 32, height: 32)
+                .frame(width: 20, height: 20)
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.circle)
+        // About 44 pt overall, the height of the glass menus beside it (it was 56).
         .controlSize(.large)
         .accessibilityLabel(label)
     }
@@ -63,8 +64,24 @@ struct AccentGlassMenu: ViewModifier {
     }
 }
 
+/// A menu that sits on the page, not over content: tinted text, no capsule.
+struct PlainAccentMenu: ViewModifier {
+    @Environment(\.accentColors) private var accent
+
+    func body(content: Content) -> some View {
+        content
+            .font(.body.weight(.semibold))
+            .foregroundStyle(accent.tint)
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .frame(minHeight: 44)
+            .contentShape(.rect)
+    }
+}
+
 extension View {
     func accentGlassMenu() -> some View { modifier(AccentGlassMenu()) }
+    func plainAccentMenu() -> some View { modifier(PlainAccentMenu()) }
 }
 
 extension PrimitiveButtonStyle where Self == AccentGlassButtonStyle {

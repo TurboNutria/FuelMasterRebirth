@@ -15,6 +15,13 @@ public struct ResolveProvinces: Sendable {
         await provinces.provinces(intersecting: viewport.bounds).sorted()
     }
 
+    /// Every province, sorted by name, for "Provincia sin ubicación".
+    public func all() async -> [Province] {
+        await provinces.allProvinces().sorted {
+            $0.name.compare($1.name, locale: Locale(identifier: "es_ES")) == .orderedAscending
+        }
+    }
+
     /// Name and bounds of one province, e.g. the default one when location is denied.
     public func province(_ id: ProvinceID) async -> Province? {
         await provinces.allProvinces().first { $0.id == id }

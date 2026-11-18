@@ -2,36 +2,6 @@ import DomainLayer
 import SwiftUI
 import ViewModelLayer
 
-// Temporary screens for the U1 shell. Each UI phase replaces one of them:
-// detail (U4), Favoritos + Buscar (U5), Ajustes (U6).
-
-struct PlaceholderScreen: View {
-    let tab: AppTab
-
-    var body: some View {
-        NavigationStack {
-            ContentUnavailableView {
-                Label { tab.title } icon: { Image(systemName: tab.systemImage) }
-            } description: {
-                Text("En construcción", bundle: .module)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(ColorTokens.background)
-            .navigationTitle(tab.title)
-        }
-    }
-}
-
-struct DetailPlaceholder: View {
-    var body: some View {
-        ContentUnavailableView {
-            Label { Text("Detalle", bundle: .module) } icon: { Image(systemName: "fuelpump") }
-        } description: {
-            Text("En construcción", bundle: .module)
-        }
-    }
-}
-
 /// Sample stations from the canvas (Madrid, Tuesday 20 October 2026, 22:30), for previews.
 enum SampleData {
     static let now: Date = {

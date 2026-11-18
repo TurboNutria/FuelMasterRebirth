@@ -47,6 +47,9 @@ public final class AppRouter {
         didSet { if !isDetailPresented, selectedStationID != nil { selectedStationID = nil } }
     }
     public private(set) var layoutMode: LayoutMode
+    /// The list panel is hidden and the map fills the screen (larger layouts only). Kept when the
+    /// layout changes, so it survives rotating and folding.
+    public var isPanelCollapsed = false
 
     public init(selectedTab: AppTab = .map, layoutMode: LayoutMode = .tabs) {
         self.selectedTab = selectedTab
@@ -54,6 +57,24 @@ public final class AppRouter {
     }
 
     public var visibleTabs: [AppTab] { AppTab.tabs(for: layoutMode) }
+
+    /// Whether the panel beside the map is on screen.
+    public var showsPanel: Bool { !layoutMode.hasMapTab && !isPanelCollapsed }
+
+    /// Whether the map carries its own fuel and filter menus: when no list is beside it.
+    public var showsMapMenus: Bool { !showsPanel }
+
+    /// Whether a tab's own stack pushes the detail: only in tabs.
+    public func pushesDetail(on tab: AppTab) -> Bool {
+        isDetailPresented && selectedTab == tab && layoutMode == .tabs
+    }
+
+    /// Whether the detail opens over the map (a sheet, or an inspector on wide screens), so the
+    /// panel keeps showing the tab that's selected. Pushing it into the panel replaced whatever
+    /// was there, Ajustes included (QA on the Duo, 2026-10-29).
+    public var presentsDetailBesideMap: Bool {
+        isDetailPresented && layoutMode != .tabs
+    }
 
     public func select(_ station: StationID?) {
         selectedStationID = station

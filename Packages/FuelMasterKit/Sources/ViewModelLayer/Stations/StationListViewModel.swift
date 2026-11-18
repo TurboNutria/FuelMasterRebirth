@@ -64,6 +64,7 @@ public final class StationListViewModel {
     public private(set) var scope: ListScope?
 
     private var content: StationListContent?
+    private var availableProducts: Set<Product> = []
     private var hasCache = false
     private var nearestOutside: Double?
     private var isRefreshing = false
@@ -77,6 +78,7 @@ public final class StationListViewModel {
     private var startCount = 0
     @ObservationIgnored private var observation: Task<Void, Never>?
 
+    private let toggleFavoriteUseCase: ToggleFavorite
     private let observeNearby: ObserveNearbyStations
     private let refreshPrices: RefreshPrices
     private let resolveProvinces: ResolveProvinces
@@ -90,7 +92,9 @@ public final class StationListViewModel {
     public init(observeNearby: ObserveNearbyStations, refreshPrices: RefreshPrices,
                 resolveProvinces: ResolveProvinces, observeConnectivity: ObserveConnectivity,
                 observeSettings: ObserveSettings, updateSettings: UpdateSettings, locateUser: LocateUser,
+                toggleFavorite: ToggleFavorite,
                 format: DisplayFormat = DisplayFormat(), now: @escaping @Sendable () -> Date = { .now }) {
+        self.toggleFavoriteUseCase = toggleFavorite
         self.observeNearby = observeNearby
         self.refreshPrices = refreshPrices
         self.resolveProvinces = resolveProvinces
@@ -103,6 +107,9 @@ public final class StationListViewModel {
     }
 
     // MARK: State
+
+    /// The fuels the menu offers: those with a station nearby.
+    public var offeredProducts: [Product] { Product.offered(from: availableProducts, chosen: product) }
 
     public var state: ScreenState<StationListContent> {
         guard hasCache else {
@@ -164,6 +171,12 @@ public final class StationListViewModel {
         await updateSettings { $0.product = product }
     }
 
+    /// The row's VoiceOver action "Añadir a favoritos" / "Quitar de favoritos". The nearby
+    /// stream re-emits with the star once the favourites change.
+    public func toggleFavorite(_ summary: StationSummary) async {
+        _ = try? await toggleFavoriteUseCase(summary.station.id, province: summary.station.provinceID)
+    }
+
     public func dismissOfflinePill() {
         offlineDismissed = true
     }
@@ -171,7 +184,7 @@ public final class StationListViewModel {
     // MARK: Loading
 
     private func resolveArea(settings: Settings) async {
-        if await locateUser.authorize() == .authorized, let fix = await locateUser.firstFix() {
+        if await locateUser.status() == .authorized, let fix = await locateUser.firstFix() {
             await use(location: fix)
             return
         }
@@ -221,6 +234,7 @@ public final class StationListViewModel {
     private func apply(_ result: NearbyResult, for request: NearbyRequest) async {
         guard request == self.request else { return }
         hasCache = result.freshness != nil
+        availableProducts = result.availableProducts
         let moment = now()
         content = StationListContent(
             rows: result.stations.map { summary in
@@ -266,7 +280,7 @@ public final class StationListViewModel {
     /// Moving more than a kilometre re-centres the list and loads any new provinces. A first fix
     /// that arrives late replaces the default province.
     private func watchLocation() async {
-        guard await locateUser.authorize() == .authorized else { return }
+        guard await locateUser.status() == .authorized else { return }
         for await coordinate in await locateUser.updates() {
             if let origin, coordinate.distance(to: origin) <= 1000 { continue }
             await use(location: coordinate)

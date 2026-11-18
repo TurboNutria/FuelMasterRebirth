@@ -28,26 +28,52 @@ public struct DisplayFormat: Sendable {
             .rounded(rule: .toNearestOrAwayFromZero).locale(locale))
     }
 
+    /// "55 l" / "15 kg": a full tank in the product's unit.
+    public func quantity(_ amount: Decimal, unit: QuantityUnit) -> String {
+        let value = NSDecimalNumber(decimal: amount).doubleValue
+        switch unit {
+        case .litre: return Measurement(value: value, unit: UnitVolume.liters).formatted(quantityStyle())
+        case .kilogram: return Measurement(value: value, unit: UnitMass.kilograms).formatted(quantityStyle())
+        }
+    }
+
+    private func quantityStyle<U: Dimension>() -> Measurement<U>.FormatStyle {
+        .measurement(width: .abbreviated, usage: .asProvided, numberFormatStyle: .number.precision(.fractionLength(0...1)))
+            .locale(locale)
+    }
+
     // MARK: Distance
 
-    /// "850 m" / "1,4 km", or miles where the device uses imperial road distances.
+    /// "850 m" / "1,4 km" / "2,0 km", or miles where the device uses imperial road distances.
+    /// Under 100 km or mi it always keeps one decimal, so distances in a list line up.
     public func distance(meters: Double) -> String {
+        format(meters: meters, keepsDecimal: true)
+    }
+
+    /// The search radius in the list header: "3 km" rather than "3,0 km".
+    public func radius(meters: Double) -> String {
+        format(meters: meters, keepsDecimal: false)
+    }
+
+    private func format(meters: Double, keepsDecimal: Bool) -> String {
         if locale.measurementSystem == .metric {
             if meters < 1000 {
                 let rounded = max(10, (meters / 10).rounded() * 10)
-                return Measurement(value: rounded, unit: UnitLength.meters).formatted(style(maxFractionDigits: 0))
+                return Measurement(value: rounded, unit: UnitLength.meters).formatted(style(maxFractionDigits: 0, keepsDecimal: false))
             }
             let digits = meters < 100_000 ? 1 : 0
-            return Measurement(value: meters / 1000, unit: UnitLength.kilometers).formatted(style(maxFractionDigits: digits))
+            return Measurement(value: meters / 1000, unit: UnitLength.kilometers)
+                .formatted(style(maxFractionDigits: digits, keepsDecimal: keepsDecimal))
         }
         let miles = meters / 1609.344
-        return Measurement(value: max(0.1, miles), unit: UnitLength.miles).formatted(style(maxFractionDigits: miles < 100 ? 1 : 0))
+        return Measurement(value: max(0.1, miles), unit: UnitLength.miles)
+            .formatted(style(maxFractionDigits: miles < 100 ? 1 : 0, keepsDecimal: keepsDecimal))
     }
 
-    /// Up to `maxFractionDigits`, so a whole number reads "3 km" rather than "3,0 km".
-    private func style(maxFractionDigits: Int) -> Measurement<UnitLength>.FormatStyle {
-        .measurement(width: .abbreviated, usage: .asProvided,
-                     numberFormatStyle: .number.precision(.fractionLength(0...maxFractionDigits)))
+    private func style(maxFractionDigits: Int, keepsDecimal: Bool) -> Measurement<UnitLength>.FormatStyle {
+        let minimum = keepsDecimal ? maxFractionDigits : 0
+        return .measurement(width: .abbreviated, usage: .asProvided,
+                            numberFormatStyle: .number.precision(.fractionLength(minimum...maxFractionDigits)))
             .locale(locale)
     }
 

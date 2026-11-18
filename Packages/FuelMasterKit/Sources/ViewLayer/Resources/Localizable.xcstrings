@@ -1,720 +1,112 @@
 {
-  "sourceLanguage": "es",
-  "strings": {
-    "Diésel": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diesel"
+  "sourceLanguage" : "es",
+  "strings" : {
+    "¿Dónde buscamos?" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where should we look?"
           }
         }
       }
     },
-    "Diésel Premium": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Premium diesel"
+    "¿Qué combustible usas?" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Which fuel do you use?"
           }
         }
       }
     },
-    "Gasolina 95": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Petrol 95"
+    "%@ bajo la media" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ below average"
           }
         }
       }
     },
-    "Gasolina 95 E10": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Petrol 95 E10"
+    "%@ sobre la media" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ above average"
           }
         }
       }
     },
-    "Gasolina 95 Premium": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Premium petrol 95"
+    "%@, %@" : {
+      "comment" : "Price and its level: 1,859 €, barata",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
           }
         }
       }
     },
-    "Gasolina 98": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Petrol 98"
+    "%@, %@, %@" : {
+      "comment" : "Row: product, price, level",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@, %3$@"
           }
         }
       }
     },
-    "Gasolina 98 E10": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Petrol 98 E10"
+    "%lld cerca" : {
+      "comment" : "Header at very large text sizes",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld nearby"
           }
         }
       }
     },
-    "GLP": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "LPG"
-          }
-        }
-      }
-    },
-    "GNC": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "CNG"
-          }
-        }
-      }
-    },
-    "GNL": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "LNG"
-          }
-        }
-      }
-    },
-    "Diésel renovable (HVO)": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Renewable diesel (HVO)"
-          }
-        }
-      }
-    },
-    "AdBlue": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "AdBlue"
-          }
-        }
-      }
-    },
-    "barata": {
-      "comment": "Price level, read inside a sentence",
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "cheap"
-          }
-        }
-      }
-    },
-    "media": {
-      "comment": "Price level, read inside a sentence",
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "average"
-          }
-        }
-      }
-    },
-    "cara": {
-      "comment": "Price level, read inside a sentence",
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "expensive"
-          }
-        }
-      }
-    },
-    "Precio cargando": {
-      "comment": "Grey placeholder chip on first load",
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Price loading"
-          }
-        }
-      }
-    },
-    "%@, %@": {
-      "comment": "Price and its level: 1,859 €, barata",
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$@"
-          }
-        }
-      }
-    },
-    "24 h": {
-      "comment": "Open all day, short",
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "24 h"
-          }
-        }
-      }
-    },
-    "Cerrada hoy": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Closed today"
-          }
-        }
-      }
-    },
-    "Abierta 24 horas": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open 24 hours"
-          }
-        }
-      }
-    },
-    "Abierta": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open"
-          }
-        }
-      }
-    },
-    "Abierta, cierra a las %@": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open, closes at %@"
-          }
-        }
-      }
-    },
-    "Cerrada": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Closed"
-          }
-        }
-      }
-    },
-    "Cerrada, abre a las %@": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Closed, opens at %@"
-          }
-        }
-      }
-    },
-    "Horario: %@": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hours: %@"
-          }
-        }
-      }
-    },
-    "%@, %@, %@": {
-      "comment": "Row: product, price, level",
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$@, %3$@"
-          }
-        }
-      }
-    },
-    "A %@": {
-      "comment": "Distance from you",
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ away"
-          }
-        }
-      }
-    },
-    "Favorita": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Favourite"
-          }
-        }
-      }
-    },
-    "Ver en el mapa": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show on map"
-          }
-        }
-      }
-    },
-    "Centrar en mi ubicación": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Centre on my location"
-          }
-        }
-      }
-    },
-    "Actualizando…": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Updating…"
-          }
-        }
-      }
-    },
-    "Sin conexión": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Offline"
-          }
-        }
-      }
-    },
-    "Sin conexión · precios de %@": {
-      "comment": "Offline pill; the argument reads like “hace 2 h”",
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Offline · prices from %@"
-          }
-        }
-      }
-    },
-    "Cerrar aviso": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dismiss"
-          }
-        }
-      }
-    },
-    "Mapa": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Map"
-          }
-        }
-      }
-    },
-    "Gasolineras": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stations"
-          }
-        }
-      }
-    },
-    "Favoritos": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Favourites"
-          }
-        }
-      }
-    },
-    "Ajustes": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Settings"
-          }
-        }
-      }
-    },
-    "Buscar": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Search"
-          }
-        }
-      }
-    },
-    "En construcción": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Coming soon"
-          }
-        }
-      }
-    },
-    "Detalle": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Details"
-          }
-        }
-      }
-    },
-    "Mueve el mapa para ver otra zona o cambia de combustible.": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Move the map to see another area, or change fuel."
-          }
-        }
-      }
-    },
-    "Combustible": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fuel"
-          }
-        }
-      }
-    },
-    "Más barata": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cheapest"
-          }
-        }
-      }
-    },
-    "Más cerca": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nearest"
-          }
-        }
-      }
-    },
-    "Ordenar": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sort"
-          }
-        }
-      }
-    },
-    "Todas": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All"
-          }
-        }
-      }
-    },
-    "Baratas": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cheap"
-          }
-        }
-      }
-    },
-    "Medias": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Average"
-          }
-        }
-      }
-    },
-    "Caras": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Expensive"
-          }
-        }
-      }
-    },
-    "Filtro de precio": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Price filter"
-          }
-        }
-      }
-    },
-    "Filtros": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Filters"
-          }
-        }
-      }
-    },
-    "Cargando gasolineras": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loading stations"
-          }
-        }
-      }
-    },
-    "Cerca de ti": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Near you"
-          }
-        }
-      }
-    },
-    "En %@": {
-      "comment": "Header without location: En Madrid",
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In %@"
-          }
-        }
-      }
-    },
-    "%lld cerca": {
-      "comment": "Header at very large text sizes",
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld nearby"
-          }
-        }
-      }
-    },
-    "No hay gasolineras con %@ cerca": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No %@ stations nearby"
-          }
-        }
-      }
-    },
-    "La más cercana está a %@.": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The nearest one is %@ away."
-          }
-        }
-      }
-    },
-    "Prueba con «Todas» o con otro combustible.": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Try “All” or another fuel."
-          }
-        }
-      }
-    },
-    "Ver todas": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show all"
-          }
-        }
-      }
-    },
-    "No hay gasolineras baratas aquí": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No cheap stations here"
-          }
-        }
-      }
-    },
-    "No hay gasolineras de precio medio aquí": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No average-priced stations here"
-          }
-        }
-      }
-    },
-    "No hay gasolineras caras aquí": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No expensive stations here"
-          }
-        }
-      }
-    },
-    "No se pudieron cargar los precios": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couldn’t load prices"
-          }
-        }
-      }
-    },
-    "Conéctate a internet para ver los precios de hoy.": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connect to the internet to see today’s prices."
-          }
-        }
-      }
-    },
-    "El servidor del ministerio no responde. Inténtalo de nuevo en unos minutos.": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The ministry’s server isn’t responding. Try again in a few minutes."
-          }
-        }
-      }
-    },
-    "Reintentar": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Try again"
-          }
-        }
-      }
-    },
-    "%lld estaciones": {
-      "localizations": {
-        "es": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld estación"
+    "%lld estaciones" : {
+      "localizations" : {
+        "en-GB" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld station"
                 }
               },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld estaciones"
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld stations"
                 }
               }
             }
           }
         },
-        "en-GB": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld station"
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld estación"
                 }
               },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld stations"
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld estaciones"
                 }
               }
             }
@@ -722,198 +114,1876 @@
         }
       }
     },
-    "%lld gasolineras cargadas": {
-      "comment": "VoiceOver announcement after the first load",
-      "localizations": {
-        "es": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld gasolinera cargada"
+    "%lld gasolineras cargadas" : {
+      "comment" : "VoiceOver announcement after the first load",
+      "localizations" : {
+        "en-GB" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld station loaded"
                 }
               },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld gasolineras cargadas"
-                }
-              }
-            }
-          }
-        },
-        "en-GB": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld station loaded"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld stations loaded"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "Acerca el mapa para ver los precios": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zoom in to see prices"
-          }
-        }
-      }
-    },
-    "Cargando precios…": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loading prices…"
-          }
-        }
-      }
-    },
-    "Actualizado %@": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Updated %@"
-          }
-        }
-      }
-    },
-    "media %@": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "average %@"
-          }
-        }
-      }
-    },
-    "La más barata cerca": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cheapest nearby"
-          }
-        }
-      }
-    },
-    "Cómo llegar": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Directions"
-          }
-        }
-      }
-    },
-    "Ver detalle": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Details"
-          }
-        }
-      }
-    },
-    "%@ bajo la media": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ below average"
-          }
-        }
-      }
-    },
-    "%@ sobre la media": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ above average"
-          }
-        }
-      }
-    },
-    "En la media": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "At the average"
-          }
-        }
-      }
-    },
-    "La más barata cerca: %@": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cheapest nearby: %@"
-          }
-        }
-      }
-    },
-    "%lld gasolineras, desde %@": {
-      "comment": "Map cluster, VoiceOver",
-      "localizations": {
-        "es": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld gasolinera, desde %@"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld gasolineras, desde %@"
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld stations loaded"
                 }
               }
             }
           }
         },
-        "en-GB": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld station, from %@"
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld gasolinera cargada"
                 }
               },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "%lld stations, from %@"
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld gasolineras cargadas"
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "%lld gasolineras, desde %@" : {
+      "comment" : "Map cluster, VoiceOver",
+      "localizations" : {
+        "en-GB" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld station, from %@"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld stations, from %@"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld gasolinera, desde %@"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld gasolineras, desde %@"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "€/kg" : {
+
+    },
+    "€/l" : {
+
+    },
+    "24 h" : {
+      "comment" : "Open all day, short",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 h"
+          }
+        }
+      }
+    },
+    "a %@" : {
+      "comment" : "Distance inside a sentence: a 1,4 km",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ away"
+          }
+        }
+      }
+    },
+    "A %@" : {
+      "comment" : "Distance from you",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ away"
+          }
+        }
+      }
+    },
+    "Abierta" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open"
+          }
+        }
+      }
+    },
+    "Abierta 24 h" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open 24 h"
+          }
+        }
+      }
+    },
+    "Abierta 24 horas" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open 24 hours"
+          }
+        }
+      }
+    },
+    "Abierta, cierra a las %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open, closes at %@"
+          }
+        }
+      }
+    },
+    "Abre a las %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens at %@"
+          }
+        }
+      }
+    },
+    "Abre el %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens %@"
+          }
+        }
+      }
+    },
+    "Abre hoy" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens today"
+          }
+        }
+      }
+    },
+    "Abre mañana" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens tomorrow"
+          }
+        }
+      }
+    },
+    "Acerca el mapa para ver los precios" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoom in to see prices"
+          }
+        }
+      }
+    },
+    "Actualizado %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updated %@"
+          }
+        }
+      }
+    },
+    "Actualizado %@ · Precios del Ministerio" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updated %@ · Ministry prices"
+          }
+        }
+      }
+    },
+    "Actualizando…" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updating…"
+          }
+        }
+      }
+    },
+    "AdBlue" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AdBlue"
+          }
+        }
+      }
+    },
+    "Ajustes" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
+    },
+    "Añadir a favoritos" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to favourites"
+          }
+        }
+      }
+    },
+    "Apariencia" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        }
+      }
+    },
+    "Aspecto" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Look"
+          }
+        }
+      }
+    },
+    "Atrás" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        }
+      }
+    },
+    "Aún no tienes favoritas" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No favourites yet"
+          }
+        }
+      }
+    },
+    "Aviso" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notice"
+          }
+        }
+      }
+    },
+    "Azul" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blue"
+          }
+        }
+      }
+    },
+    "Azul y naranja" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blue and orange"
+          }
+        }
+      }
+    },
+    "barata" : {
+      "comment" : "Price level, read inside a sentence",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cheap"
+          }
+        }
+      }
+    },
+    "Baratas" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheap"
+          }
+        }
+      }
+    },
+    "Borrar" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        }
+      }
+    },
+    "Busca una gasolinera" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search for a station"
+          }
+        }
+      }
+    },
+    "Buscar" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search"
+          }
+        }
+      }
+    },
+    "Buscar en" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search in"
+          }
+        }
+      }
+    },
+    "C. P." : {
+      "comment" : "Postcode, short",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Postcode"
+          }
+        }
+      }
+    },
+    "C. P. %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Postcode %@"
+          }
+        }
+      }
+    },
+    "cara" : {
+      "comment" : "Price level, read inside a sentence",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "expensive"
+          }
+        }
+      }
+    },
+    "Caras" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expensive"
+          }
+        }
+      }
+    },
+    "Cargando gasolineras" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading stations"
+          }
+        }
+      }
+    },
+    "Cargando precios…" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading prices…"
+          }
+        }
+      }
+    },
+    "Centrar en mi ubicación" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Centre on my location"
+          }
+        }
+      }
+    },
+    "Cerca de ti" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Near you"
+          }
+        }
+      }
+    },
+    "Cerrada" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closed"
+          }
+        }
+      }
+    },
+    "Cerrada hoy" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closed today"
+          }
+        }
+      }
+    },
+    "Cerrada, abre a las %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Closed, opens at %@"
+          }
+        }
+      }
+    },
+    "Cerrar" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        }
+      }
+    },
+    "Cerrar aviso" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dismiss"
+          }
+        }
+      }
+    },
+    "Claro" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light"
+          }
+        }
+      }
+    },
+    "Color de la app" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App colour"
+          }
+        }
+      }
+    },
+    "Colores de precio" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Price colours"
+          }
+        }
+      }
+    },
+    "Combustible" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fuel"
+          }
+        }
+      }
+    },
+    "Cómo llegar" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Directions"
+          }
+        }
+      }
+    },
+    "Compartir" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share"
+          }
+        }
+      }
+    },
+    "Conéctate a internet para ver los precios de hoy." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connect to the internet to see today’s prices."
+          }
+        }
+      }
+    },
+    "Datos" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data"
+          }
+        }
+      }
+    },
+    "Datos del" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data from"
+          }
+        }
+      }
+    },
+    "Depósito" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tank"
+          }
+        }
+      }
+    },
+    "Depósito lleno · %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full tank · %@"
+          }
+        }
+      }
+    },
+    "Depósito lleno (%@): %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Full tank (%1$@): %2$@"
+          }
+        }
+      }
+    },
+    "Día" : {
+
+    },
+    "Diésel" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diesel"
+          }
+        }
+      }
+    },
+    "Diésel Premium" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premium diesel"
+          }
+        }
+      }
+    },
+    "Diésel renovable (HVO)" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renewable diesel (HVO)"
+          }
+        }
+      }
+    },
+    "Editar" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        }
+      }
+    },
+    "El servidor del ministerio no responde. Inténtalo de nuevo en unos minutos." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The ministry’s server isn’t responding. Try again in a few minutes."
+          }
+        }
+      }
+    },
+    "Elegir provincia" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a province"
+          }
+        }
+      }
+    },
+    "Empezar" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get started"
+          }
+        }
+      }
+    },
+    "En %@" : {
+      "comment" : "Header without location: En Madrid",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In %@"
+          }
+        }
+      }
+    },
+    "En la media" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At the average"
+          }
+        }
+      }
+    },
+    "Esta estación" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This station"
+          }
+        }
+      }
+    },
+    "Esta gasolinera no vende %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This station doesn't sell %@"
+          }
+        }
+      }
+    },
+    "Faltan días: no se pudo descargar el historial." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some days are missing: the history couldn't be downloaded."
+          }
+        }
+      }
+    },
+    "Favorita" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favourite"
+          }
+        }
+      }
+    },
+    "Favoritos" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favourites"
+          }
+        }
+      }
+    },
+    "Filtro de precio" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Price filter"
+          }
+        }
+      }
+    },
+    "Filtros" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filters"
+          }
+        }
+      }
+    },
+    "FuelMaster no está vinculada al Ministerio ni a ninguna marca. Comprueba el precio en el surtidor." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FuelMaster isn't linked to the Ministry or to any brand. Check the price at the pump."
+          }
+        }
+      }
+    },
+    "Fuente y aviso legal" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source and legal notice"
+          }
+        }
+      }
+    },
+    "Funciona sin conexión" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Works offline"
+          }
+        }
+      }
+    },
+    "Gasolina 95" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petrol 95"
+          }
+        }
+      }
+    },
+    "Gasolina 95 E10" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petrol 95 E10"
+          }
+        }
+      }
+    },
+    "Gasolina 95 Premium" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premium petrol 95"
+          }
+        }
+      }
+    },
+    "Gasolina 98" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petrol 98"
+          }
+        }
+      }
+    },
+    "Gasolina 98 E10" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petrol 98 E10"
+          }
+        }
+      }
+    },
+    "Gasolinera" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Station"
+          }
+        }
+      }
+    },
+    "Gasolineras" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stations"
+          }
+        }
+      }
+    },
+    "GLP" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LPG"
+          }
+        }
+      }
+    },
+    "GNC" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CNG"
+          }
+        }
+      }
+    },
+    "GNL" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LNG"
+          }
+        }
+      }
+    },
+    "Grafito" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graphite"
+          }
+        }
+      }
+    },
+    "Ha bajado %@ desde ayer" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Down %@ since yesterday"
+          }
+        }
+      }
+    },
+    "Ha subido %@ desde ayer" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up %@ since yesterday"
+          }
+        }
+      }
+    },
+    "Hecho" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        }
+      }
+    },
+    "Horario: %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hours: %@"
+          }
+        }
+      }
+    },
+    "Hoy vs. hace 7 d" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "7-day change"
+          }
+        }
+      }
+    },
+    "iCloud no está disponible." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud isn't available."
+          }
+        }
+      }
+    },
+    "Idioma" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Language"
+          }
+        }
+      }
+    },
+    "Igual que ayer" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Same as yesterday"
+          }
+        }
+      }
+    },
+    "Inicia sesión en iCloud para sincronizarlas." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in to iCloud to sync them."
+          }
+        }
+      }
+    },
+    "kg" : {
+
+    },
+    "l" : {
+
+    },
+    "La gasolinera más barata cerca de ti." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The cheapest station near you."
+          }
+        }
+      }
+    },
+    "La más barata" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheapest"
+          }
+        }
+      }
+    },
+    "La más barata cerca" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheapest nearby"
+          }
+        }
+      }
+    },
+    "La más barata cerca: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheapest nearby: %@"
+          }
+        }
+      }
+    },
+    "La más cercana está a %@." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The nearest one is %@ away."
+          }
+        }
+      }
+    },
+    "Localidad" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Town"
+          }
+        }
+      }
+    },
+    "Localidad %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Town %@"
+          }
+        }
+      }
+    },
+    "Mapa" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Map"
+          }
+        }
+      }
+    },
+    "Marca" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brand"
+          }
+        }
+      }
+    },
+    "Marca %@ cerca de ti" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brand %@ near you"
+          }
+        }
+      }
+    },
+    "Marca %@ en %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brand %1$@ in %2$@"
+          }
+        }
+      }
+    },
+    "Marca, localidad o C. P." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brand, town or postcode"
+          }
+        }
+      }
+    },
+    "Más barata" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheapest"
+          }
+        }
+      }
+    },
+    "Más barata cerca" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheapest nearby"
+          }
+        }
+      }
+    },
+    "más baratas primero" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cheapest first"
+          }
+        }
+      }
+    },
+    "Más cerca" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nearest"
+          }
+        }
+      }
+    },
+    "Más cercana abierta: %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nearest open: %@"
+          }
+        }
+      }
+    },
+    "más cercanas primero" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nearest first"
+          }
+        }
+      }
+    },
+    "Máximo" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highest"
+          }
+        }
+      }
+    },
+    "media" : {
+      "comment" : "Price level, read inside a sentence",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "average"
+          }
+        }
+      }
+    },
+    "media %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "average %@"
+          }
+        }
+      }
+    },
+    "Media de %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ average"
+          }
+        }
+      }
+    },
+    "Media de %@ entre %@ y %@." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ average between %2$@ and %3$@."
+          }
+        }
+      }
+    },
+    "Medias" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Average"
+          }
+        }
+      }
+    },
+    "Mínimo" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lowest"
+          }
+        }
+      }
+    },
+    "Ministerio para la Transición Ecológica y el Reto Demográfico. Licencia CC BY 4.0." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spanish Ministry for the Ecological Transition and the Demographic Challenge. CC BY 4.0 licence."
+          }
+        }
+      }
+    },
+    "Monocromo" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monochrome"
+          }
+        }
+      }
+    },
+    "Morado" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purple"
+          }
+        }
+      }
+    },
+    "Mostrar lista" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show list"
+          }
+        }
+      }
+    },
+    "Mueve el mapa para ver otra zona o cambia de combustible." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move the map to see another area, or change fuel."
+          }
+        }
+      }
+    },
+    "Naranja" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orange"
+          }
+        }
+      }
+    },
+    "No encontramos esta gasolinera" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't find this station"
+          }
+        }
+      }
+    },
+    "No hay gasolineras baratas aquí" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No cheap stations here"
+          }
+        }
+      }
+    },
+    "No hay gasolineras caras aquí" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No expensive stations here"
+          }
+        }
+      }
+    },
+    "No hay gasolineras con %@ cerca" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No %@ stations nearby"
+          }
+        }
+      }
+    },
+    "No hay gasolineras de precio medio aquí" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No average-priced stations here"
+          }
+        }
+      }
+    },
+    "No se pudieron cargar los precios" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t load prices"
+          }
+        }
+      }
+    },
+    "No vende %@" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doesn't sell %@"
+          }
+        }
+      }
+    },
+    "Ocultar lista" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hide list"
+          }
+        }
+      }
+    },
+    "Ordenar" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sort"
+          }
+        }
+      }
+    },
+    "Oscuro" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark"
+          }
+        }
+      }
+    },
+    "Personalizado" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom"
+          }
+        }
+      }
+    },
+    "Por marca, localidad o código postal." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By brand, town or postcode."
+          }
+        }
+      }
+    },
+    "Precio" : {
+
+    },
+    "Precio cargando" : {
+      "comment" : "Grey placeholder chip on first load",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Price loading"
+          }
+        }
+      }
+    },
+    "Precios oficiales" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Official prices"
+          }
+        }
+      }
+    },
+    "Privacidad" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy"
+          }
+        }
+      }
+    },
+    "Provincia" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Province"
+          }
+        }
+      }
+    },
+    "Provincia sin ubicación" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Province without location"
+          }
+        }
+      }
+    },
+    "Prueba con «Todas» o con otro combustible." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try “All” or another fuel."
+          }
+        }
+      }
+    },
+    "Prueba con una marca, una localidad o un código postal distinto." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try a different brand, town or postcode."
+          }
+        }
+      }
+    },
+    "Puede que sus precios aún no se hayan cargado." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Its prices may not have loaded yet."
+          }
+        }
+      }
+    },
+    "Quitar" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
+          }
+        }
+      }
+    },
+    "Quitar de favoritos" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove from favourites"
+          }
+        }
+      }
+    },
+    "Reintentar" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        }
+      }
+    },
+    "Rosa" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pink"
+          }
+        }
+      }
+    },
+    "Semáforo" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traffic light"
+          }
+        }
+      }
+    },
+    "Serie" : {
+
+    },
+    "Siguiente" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        }
+      }
+    },
+    "Sin cambios" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No change"
+          }
+        }
+      }
+    },
+    "Sin conexión" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline"
+          }
+        }
+      }
+    },
+    "Sin conexión · precios de %@" : {
+      "comment" : "Offline pill; the argument reads like “hace 2 h”",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline · prices from %@"
+          }
+        }
+      }
+    },
+    "Sin cuentas ni anuncios" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No accounts or ads"
+          }
+        }
+      }
+    },
+    "Sin resultados para «%@»" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No results for “%@”"
+          }
+        }
+      }
+    },
+    "Sistema" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System"
+          }
+        }
+      }
+    },
+    "Toca la estrella en una gasolinera para añadirla." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the star on a station to add it."
+          }
+        }
+      }
+    },
+    "Todas" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        }
+      }
+    },
+    "Todo" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        }
+      }
+    },
+    "Tu coche" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your car"
+          }
+        }
+      }
+    },
+    "Tu ubicación solo se usa en tu dispositivo. Sin cuentas, anuncios ni rastreo." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your location is only used on your device. No accounts, ads or tracking."
+          }
+        }
+      }
+    },
+    "Tu ubicación solo se usa en tu iPhone." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your location is only used on your iPhone."
+          }
+        }
+      }
+    },
+    "Últimos 7 días" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 7 days"
+          }
+        }
+      }
+    },
+    "Últimos 7 días: %@ todos los días." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 7 days: %@ every day."
+          }
+        }
+      }
+    },
+    "Últimos 7 días: entre %@ y %@." : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 7 days: between %1$@ and %2$@."
+          }
+        }
+      }
+    },
+    "un precio por día" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "one price per day"
+          }
+        }
+      }
+    },
+    "Usar mi ubicación" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use my location"
+          }
+        }
+      }
+    },
+    "Ver detalle" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details"
+          }
+        }
+      }
+    },
+    "Ver en el mapa" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show on map"
+          }
+        }
+      }
+    },
+    "Ver la fuente" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View the source"
+          }
+        }
+      }
+    },
+    "Ver todas" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show all"
+          }
+        }
+      }
+    },
+    "Verde" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Green"
+          }
+        }
+      }
+    },
+    "vs ayer" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vs yesterday"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

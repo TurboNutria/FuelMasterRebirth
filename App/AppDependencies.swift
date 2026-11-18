@@ -3,6 +3,7 @@ import DomainLayer
 import Foundation
 import NetworkLayer
 import SwiftData
+import ViewLayer
 import ViewModelLayer
 import WidgetKit
 
@@ -27,6 +28,15 @@ final class AppDependencies {
     let observeSettings: ObserveSettings
     let updateSettings: UpdateSettings
     let locateUser: LocateUser
+    let getStationDetail: GetStationDetail
+    let getPriceHistory: GetPriceHistory
+    let toggleFavorite: ToggleFavorite
+    let observeFavorites: ObserveFavorites
+    let reorderFavorites: ReorderFavorites
+    let observeICloudStatus: ObserveICloudStatus
+    let searchStations: SearchStations
+    let completeOnboarding: CompleteOnboarding
+    let getDataSourceInfo: GetDataSourceInfo
 
     init() throws {
         cacheContainer = try PersistenceFactory.cacheContainer()
@@ -48,6 +58,30 @@ final class AppDependencies {
         observeSettings = ObserveSettings(settings: localData)
         updateSettings = UpdateSettings(settings: localData)
         locateUser = LocateUser(location: location)
+        getStationDetail = GetStationDetail(cache: localData, favorites: favorites)
+        getPriceHistory = GetPriceHistory(cache: localData, backfill: backfillHistory)
+        toggleFavorite = ToggleFavorite(favorites: favorites)
+        observeFavorites = ObserveFavorites(favorites: favorites, cache: localData)
+        reorderFavorites = ReorderFavorites(favorites: favorites)
+        observeICloudStatus = ObserveICloudStatus(favorites: favorites)
+        searchStations = SearchStations(cache: localData, provinces: localData, favorites: favorites,
+                                        refreshPrices: refreshPrices)
+        completeOnboarding = CompleteOnboarding(settings: localData)
+        getDataSourceInfo = GetDataSourceInfo(cache: localData, provinces: localData)
+    }
+
+    /// Every screen's view model, created once and kept by the app.
+    @MainActor func makeViewModels() -> RootViewModels {
+        RootViewModels(
+            stationList: makeStationListViewModel(), map: makeMapViewModel(), detail: makeStationDetailViewModel(),
+            favorites: makeFavoritesViewModel(), search: makeSearchViewModel(),
+            settings: SettingsViewModel(observeSettings: observeSettings, updateSettings: updateSettings,
+                                        resolveProvinces: resolveProvinces, getDataSourceInfo: getDataSourceInfo),
+            onboarding: OnboardingViewModel(completeOnboarding: completeOnboarding, resolveProvinces: resolveProvinces,
+                                            locateUser: locateUser),
+            tent: TentBoardViewModel(getDetail: getStationDetail, getHistory: getPriceHistory,
+                                     backfillHistory: backfillHistory)
+        )
     }
 
     /// Created once and kept by the app, so screen state survives layout changes.
@@ -55,7 +89,7 @@ final class AppDependencies {
         StationListViewModel(
             observeNearby: observeNearbyStations, refreshPrices: refreshPrices, resolveProvinces: resolveProvinces,
             observeConnectivity: observeConnectivity, observeSettings: observeSettings,
-            updateSettings: updateSettings, locateUser: locateUser
+            updateSettings: updateSettings, locateUser: locateUser, toggleFavorite: toggleFavorite
         )
     }
 
@@ -64,6 +98,30 @@ final class AppDependencies {
             observeNearby: observeNearbyStations, refreshPrices: refreshPrices, resolveProvinces: resolveProvinces,
             observeConnectivity: observeConnectivity, observeSettings: observeSettings,
             updateSettings: updateSettings, locateUser: locateUser
+        )
+    }
+}
+
+extension AppDependencies {
+    @MainActor func makeStationDetailViewModel() -> StationDetailViewModel {
+        StationDetailViewModel(
+            getDetail: getStationDetail, getHistory: getPriceHistory, toggleFavorite: toggleFavorite,
+            observeSettings: observeSettings, locateUser: locateUser
+        )
+    }
+
+    @MainActor func makeFavoritesViewModel() -> FavoritesViewModel {
+        FavoritesViewModel(
+            observeFavorites: observeFavorites, toggleFavorite: toggleFavorite, reorderFavorites: reorderFavorites,
+            observeICloudStatus: observeICloudStatus, refreshPrices: refreshPrices, backfillHistory: backfillHistory,
+            observeSettings: observeSettings, locateUser: locateUser
+        )
+    }
+
+    @MainActor func makeSearchViewModel() -> SearchViewModel {
+        SearchViewModel(
+            searchStations: searchStations, resolveProvinces: resolveProvinces, toggleFavorite: toggleFavorite,
+            observeSettings: observeSettings, locateUser: locateUser
         )
     }
 }

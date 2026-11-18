@@ -2,18 +2,22 @@ import DomainLayer
 import SwiftUI
 
 /// Colour tokens from the design canvas (Fundamentos and Apariencia). Light / dark pairs.
+/// Dark mode is one neutral graphite ramp (not black, not navy): background, then surface and
+/// cell a step lighter each, with hairlines a little above the background.
 public enum ColorTokens {
-    public static let background = Color(light: 0xFAFAFA, dark: 0x171A27)
-    public static let surface = Color(light: 0xFFFFFF, dark: 0x28283B)
-    public static let cell = Color(light: 0xF2F2F2, dark: 0x494C5D)
-    public static let separator = Color(light: 0xEFEFEF, dark: 0x40403F)
+    public static let background = Color(light: 0xFAFAFA, dark: 0x1A1A1D)
+    public static let surface = Color(light: 0xFFFFFF, dark: 0x242428)
+    public static let cell = Color(light: 0xF2F2F2, dark: 0x323236)
+    public static let separator = Color(light: 0xEFEFEF, dark: 0x313136)
     /// Outline of unselected filter chips.
-    public static let chipBorder = Color(light: 0xC9CCD3, dark: 0x5A5D6B)
-    public static let textPrimary = Color(light: 0x1C1C1E, dark: 0xF2F2F7)
-    public static let textSecondary = Color(light: 0x5B5F6B, dark: 0xA1A4B0)
-    public static let open = Color(light: 0x1F7A3A, dark: 0x5BD07A)
-    public static let closed = Color(light: 0x6B6F7A, dark: 0xA1A4B0)
+    public static let chipBorder = Color(light: 0xC9CCD3, dark: 0x4A4A50)
+    public static let textPrimary = Color(light: 0x1C1C1E, dark: 0xF4F4F5)
+    public static let textSecondary = Color(light: 0x5B5F6B, dark: 0xA1A1AA)
+    public static let closed = Color(light: 0x6B6F7A, dark: 0xA1A1AA)
     public static let offline = Color(hex: 0xC42B1C)
+    /// "↓ 0,020 €" / "↑ 0,010 €" in Favoritos (canvas colours, lighter in dark mode).
+    public static let priceDown = Color(light: 0x1E5E2C, dark: 0x5BD07A)
+    public static let priceUp = Color(light: 0xA3261B, dark: 0xFF7B70)
 }
 
 /// Accent presets: fill, label on the fill, and the tint used for text and icons on light surfaces.
@@ -37,32 +41,34 @@ public struct AccentColors: Sendable {
     }
 }
 
-/// Chip colours per price level and scale: background, text, border.
+/// Chip colours per price level and scale: background and text. No outlines, so every fill
+/// must stand apart from the page background on its own.
 public struct PriceLevelColors: Sendable {
     public let background: Color
     public let foreground: Color
-    public let border: Color?
 
     public static func colors(for level: PriceLevel, scale: PriceScale) -> PriceLevelColors {
         switch (scale, level) {
         case (.trafficLight, .cheap):
-            PriceLevelColors(background: Color(light: 0x1E7B34, dark: 0x4CC36B), foreground: Color(light: 0xFFFFFF, dark: 0x062B12), border: nil)
+            PriceLevelColors(background: Color(light: 0x1E7B34, dark: 0x4CC36B), foreground: Color(light: 0xFFFFFF, dark: 0x062B12))
         case (.trafficLight, .average):
-            PriceLevelColors(background: Color(hex: 0xFFF1B8), foreground: Color(hex: 0x5C4400), border: Color(hex: 0xE8C95A))
+            PriceLevelColors(background: Color(hex: 0xFFEAA0), foreground: Color(hex: 0x5C4400))
         case (.trafficLight, .expensive):
-            PriceLevelColors(background: Color(hex: 0xEF5350), foreground: Color(hex: 0x2B0000), border: Color(hex: 0xD84340))
+            PriceLevelColors(background: Color(hex: 0xEF5350), foreground: Color(hex: 0x2B0000))
         case (.blueOrange, .cheap):
-            PriceLevelColors(background: Color(hex: 0x0B63C4), foreground: .white, border: nil)
+            PriceLevelColors(background: Color(hex: 0x0B63C4), foreground: .white)
         case (.blueOrange, .average):
-            PriceLevelColors(background: .white, foreground: Color(hex: 0x1C1C1E), border: Color(hex: 0xC9CCD3))
+            PriceLevelColors(background: Color(light: 0xE4E6EB, dark: 0x3A3A40), foreground: Color(light: 0x1C1C1E, dark: 0xF2F2F7))
         case (.blueOrange, .expensive):
-            PriceLevelColors(background: Color(hex: 0xFFE3CC), foreground: Color(hex: 0x8A3300), border: Color(hex: 0xF5A866))
+            PriceLevelColors(background: Color(hex: 0xFFD6B3), foreground: Color(hex: 0x8A3300))
         case (.monochrome, .cheap):
-            PriceLevelColors(background: Color(hex: 0x1C1C1E), foreground: .white, border: nil)
+            // Inverted in dark mode, or the darkest chip would vanish on a dark background.
+            PriceLevelColors(background: Color(light: 0x1C1C1E, dark: 0xF2F2F7), foreground: Color(light: 0xFFFFFF, dark: 0x1C1C1E))
+        // Average is always the chip closest to the page, expensive a step further, cheap the strongest.
         case (.monochrome, .average):
-            PriceLevelColors(background: .white, foreground: Color(hex: 0x1C1C1E), border: Color(hex: 0x9CA3AF))
+            PriceLevelColors(background: Color(light: 0xE4E6EB, dark: 0x3A3A40), foreground: Color(light: 0x1C1C1E, dark: 0xF2F2F7))
         case (.monochrome, .expensive):
-            PriceLevelColors(background: Color(hex: 0xD1D5DB), foreground: Color(hex: 0x1C1C1E), border: Color(hex: 0x9CA3AF))
+            PriceLevelColors(background: Color(light: 0x9CA3AF, dark: 0x6E6E76), foreground: Color(light: 0x1C1C1E, dark: 0xF2F2F7))
         }
     }
 }

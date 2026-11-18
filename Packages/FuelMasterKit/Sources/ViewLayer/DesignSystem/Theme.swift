@@ -7,6 +7,9 @@ extension EnvironmentValues {
     @Entry public var accentColors = AccentColors.colors(for: .preset(.orange))
     @Entry public var priceScale = PriceScale.trafficLight
     @Entry public var displayFormat = DisplayFormat()
+    /// Top safe area that only the status corner needs (the unfolded Duo in portrait), so the
+    /// left-hand controls can use it. Zero everywhere else.
+    @Entry var freeTopInset: CGFloat = 0
 }
 
 /// Type styles from the canvas "Fundamentos". Everything scales with Dynamic Type.
@@ -26,10 +29,8 @@ extension Product {
         case .diesel: LocalizedStringResource("Diésel", bundle: .viewLayer)
         case .dieselPremium: LocalizedStringResource("Diésel Premium", bundle: .viewLayer)
         case .petrol95E5: LocalizedStringResource("Gasolina 95", bundle: .viewLayer)
-        case .petrol95E10: LocalizedStringResource("Gasolina 95 E10", bundle: .viewLayer)
         case .petrol95Premium: LocalizedStringResource("Gasolina 95 Premium", bundle: .viewLayer)
         case .petrol98E5: LocalizedStringResource("Gasolina 98", bundle: .viewLayer)
-        case .petrol98E10: LocalizedStringResource("Gasolina 98 E10", bundle: .viewLayer)
         case .lpg: LocalizedStringResource("GLP", bundle: .viewLayer)
         case .cng: LocalizedStringResource("GNC", bundle: .viewLayer)
         case .lng: LocalizedStringResource("GNL", bundle: .viewLayer)

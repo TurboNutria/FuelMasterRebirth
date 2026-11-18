@@ -26,14 +26,15 @@ public struct BackfillHistory: Sendable {
         return (1...Self.days).reversed().compactMap { calendar.date(byAdding: .day, value: -$0, to: today) }
     }
 
-    /// Returns how many days were fetched.
+    /// Returns how many days were fetched. `recentDays` limits the fetch to the latest days
+    /// (Favoritos only needs yesterday), while older days are still trimmed.
     @discardableResult
-    public func callAsFunction(province: ProvinceID, product: Product) async throws -> Int {
+    public func callAsFunction(province: ProvinceID, product: Product, recentDays: Int = Self.days) async throws -> Int {
         let days = window()
         guard let oldest = days.first else { return 0 }
         let known = try await cache.historyDays(province: province, product: product, since: oldest)
         var fetched = 0
-        for day in days where !known.contains(day) {
+        for day in days.suffix(recentDays) where !known.contains(day) {
             let snapshot = try await remote.history(province: province, product: product, day: day)
             try await cache.save(snapshot)
             fetched += 1

@@ -143,7 +143,9 @@ actor CacheStore {
     private static func station(_ record: CachedStation) -> Station {
         var prices: [Product: Price] = [:]
         for cached in record.prices {
-            guard let product = Product(rawValue: cached.productID) else { continue }
+            // An E5 price wins over an E10 one cached before the two were merged.
+            guard let product = Product(storedID: cached.productID),
+                  prices[product] == nil || product.rawValue == cached.productID else { continue }
             prices[product] = Price(amount: cached.amount, product: product)
         }
         return Station(

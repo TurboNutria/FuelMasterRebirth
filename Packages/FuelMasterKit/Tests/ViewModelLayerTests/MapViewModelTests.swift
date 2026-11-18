@@ -40,20 +40,27 @@ struct PinClustererTests {
         #expect(bounds.contains(Coordinate(latitude: 40.417, longitude: -3.7035)))
     }
 
-    @Test func sideBySideChipsGroupEvenWhenCentresAreFartherThan44pt() {
-        // 0.0075° of longitude is about 49 pt here: farther than 44 pt, but 64 pt wide chips still overlap.
+    @Test func neighbouringChipsStaySeparate() {
+        // 0.0075° of longitude is about 49 pt here: the chips touch at most, so both prices show.
         let pins = PinClusterer().pins(for: [summary("a", "1.900", latitude: 40.4169, longitude: -3.7035),
                                              summary("b", "1.850", latitude: 40.4169, longitude: -3.6960)],
                                        in: viewport, width: 390)
-        #expect(pins.count == 1)
+        #expect(pins.count == 2)
     }
 
-    @Test func theHighlightedStationIsNeverGrouped() {
-        let close = [summary("a", "1.900", latitude: 40.4169), summary("b", "1.850", latitude: 40.4171),
-                     summary("c", "1.950", latitude: 40.4170)]
-        let pins = PinClusterer().pins(for: close, in: viewport, width: 390, standalone: StationID("b"))
-        #expect(pins.contains(.station(close[1])))
-        #expect(pins.contains { if case .cluster(_, 2, _) = $0 { true } else { false } })
+    @Test func aDenseAreaGroupsEveryStationOnce() {
+        // 3,000 stations on a 60 × 50 grid about 5 pt apart: every chip overlaps its neighbours.
+        let stations = (0..<3000).map { index in
+            summary("s\(index)", "1.\(500 + index % 400)", latitude: 40.40 + Double(index / 60) * 0.0006,
+                    longitude: -3.72 + Double(index % 60) * 0.0008)
+        }
+        let pins = PinClusterer().pins(for: stations, in: viewport, width: 390)
+        let counted = pins.reduce(0) { total, pin in
+            if case .cluster(_, let count, _) = pin { total + count } else { total + 1 }
+        }
+        #expect(counted == 3000)
+        #expect(pins.count < 400)
+        #expect(Set(pins.map(\.id)).count == pins.count)
     }
 
     @Test func zoomingInSeparatesThem() {
@@ -127,8 +134,9 @@ struct MapViewModelTests {
         let cheaper = Fixtures.station("new", diesel: "1.500", metersNorth: 100)
         try? await harness.cache.save(ProvinceSnapshot(provinceID: ProvinceID("28"), stations: stations + [cheaper],
                                                        snapshotDate: ListHarness.now), fetchedAt: ListHarness.now)
-        await harness.waitUntil { $0.state.content?.cheapest?.summary.id.rawValue == "new" }
-        #expect(harness.viewModel.state.content?.cheapest?.summary.id.rawValue == "new")
+        // Alone or leading a group, the new cheapest station reaches the map.
+        await harness.waitUntil { $0.state.content?.pins.contains { $0.id.hasSuffix("-new") } == true }
+        #expect(harness.viewModel.state.content?.pins.contains { $0.id.hasSuffix("-new") } == true)
     }
 
     @Test func firstLoadShowsGreyPinsInView() async {
@@ -142,18 +150,47 @@ struct MapViewModelTests {
         #expect(harness.viewModel.placeholderPins.count == 2)
     }
 
-    @Test func cheapestNearbyAndItsGapToTheAverage() async {
+    @Test func panningInsideTheLoadedAreaShowsPinsWithoutLoadingAgain() async {
+        let harness = MapHarness(remote: stations)
+        let task = Task { await harness.viewModel.start() }
+        defer { task.cancel() }
+        harness.viewModel.viewportChanged(aroundSol, width: 390)
+        await harness.waitUntil { $0.state.content != nil }
+
+        // Zoomed in on the station 1.2 km north: it's there at once, and nothing is fetched.
+        let street = MapViewport(center: Coordinate(latitude: Fixtures.sol.latitude + 1200.0 / 111_000,
+                                                    longitude: Fixtures.sol.longitude),
+                                 latitudeDelta: 0.004, longitudeDelta: 0.004)
+        harness.viewModel.viewportChanged(street, width: 390)
+        #expect(harness.viewModel.state.content?.pins.map(\.id) == ["s-cheap"])
+        try? await Task.sleep(for: .milliseconds(50))
+        #expect(await harness.remote.calls == 1)
+    }
+
+    @Test func leavingTheLoadedAreaLoadsTheNewOne() async {
         let harness = MapHarness(cached: stations)
         let task = Task { await harness.viewModel.start() }
         defer { task.cancel() }
         harness.viewModel.viewportChanged(aroundSol, width: 390)
         await harness.waitUntil { $0.state.content != nil }
 
-        let cheapest = harness.viewModel.state.content?.cheapest
-        // "far" is cheaper but out of view; "dear" is beyond 3 km anyway.
-        #expect(cheapest?.summary.id.rawValue == "cheap")
-        // Average of the whole province: (1.8 + 1.9 + 2.0 + 1.7) / 4 = 1.85.
-        #expect(cheapest?.belowAverage == Decimal(string: "0.05"))
+        let north = MapViewport(center: Coordinate(latitude: Fixtures.sol.latitude + 9000.0 / 111_000,
+                                                   longitude: Fixtures.sol.longitude),
+                                latitudeDelta: 0.06, longitudeDelta: 0.06)
+        harness.viewModel.viewportChanged(north, width: 390)
+        await harness.waitUntil { $0.state.content?.pins.contains { $0.id == "s-far" } == true }
+        #expect(harness.viewModel.state.content?.pins.contains { $0.id == "s-far" } == true)
+    }
+
+    @Test func theFuelMenuOffersOnlyWhatIsInView() async {
+        let harness = MapHarness(cached: stations)
+        let task = Task { await harness.viewModel.start() }
+        defer { task.cancel() }
+        #expect(harness.viewModel.offeredProducts == Product.allCases)
+        harness.viewModel.viewportChanged(aroundSol, width: 390)
+        await harness.waitUntil { $0.state.content != nil }
+        // The fixtures sell diesel and Gasolina 95; nothing in view sells gas.
+        #expect(harness.viewModel.offeredProducts == [.diesel, .petrol95E5])
     }
 
     @Test func zoomedOutLoadsNothing() async {

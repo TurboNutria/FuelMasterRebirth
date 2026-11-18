@@ -16,20 +16,26 @@ public struct PriceChip: View {
     let amount: Decimal?
     let level: PriceLevel?
     let size: Size
+    let brand: Brand?
 
     @Environment(\.priceScale) private var scale
     @Environment(\.displayFormat) private var format
     @Environment(\.accessibilityDifferentiateWithoutColor) private var differentiateWithoutColor
 
-    /// A nil amount is the grey "---" placeholder shown on first load.
-    public init(amount: Decimal?, level: PriceLevel?, size: Size = .regular) {
+    /// A nil amount is the grey "---" placeholder shown on first load. A brand puts its logo
+    /// at the front of the capsule (map pins).
+    public init(amount: Decimal?, level: PriceLevel?, size: Size = .regular, brand: Brand? = nil) {
         self.amount = amount
         self.level = level
         self.size = size
+        self.brand = brand
     }
 
     public var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 2) {
+            if let brand {
+                BrandLogo(brand: brand, size: Self.logoSize).padding(.trailing, 2)
+            }
             if differentiateWithoutColor, let arrow {
                 Image(systemName: arrow).font(.caption.weight(.heavy))
             }
@@ -38,16 +44,17 @@ public struct PriceChip: View {
                 .monospacedDigit()
         }
         .foregroundStyle(colors?.foreground ?? ColorTokens.textSecondary)
-        .padding(.vertical, 3)
-        .padding(.horizontal, size == .regular ? 9 : 8)
+        .padding(.vertical, brand == nil ? 4 : 3)
+        .padding(.horizontal, size == .regular ? 10 : 8)
+        .padding(.leading, brand == nil ? 0 : -5)
         .background(colors?.background ?? ColorTokens.cell, in: .capsule)
-        .overlay {
-            if let border = colors?.border { Capsule().strokeBorder(border, lineWidth: 1) }
-        }
         .fixedSize()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityText)
     }
+
+    /// Fills the small chip's height, inside a thin rim of the price colour.
+    private static let logoSize: CGFloat = 18
 
     private var colors: PriceLevelColors? {
         level.map { PriceLevelColors.colors(for: $0, scale: scale) }

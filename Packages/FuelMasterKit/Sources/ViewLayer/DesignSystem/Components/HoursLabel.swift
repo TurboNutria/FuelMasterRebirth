@@ -2,7 +2,8 @@ import DomainLayer
 import SwiftUI
 import ViewModelLayer
 
-/// Today's opening hours: green when open, grey with a moon when closed, plain when unreadable.
+/// Today's opening hours: plain secondary text when open or unreadable. Only a closed station
+/// stands out, in primary ink with a moon.
 /// VoiceOver reads the status instead of the range ("Cerrada, abre a las 7:30").
 public struct HoursLabel: View {
     let summary: HoursSummary
@@ -12,14 +13,14 @@ public struct HoursLabel: View {
     }
 
     public var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 4) {
             if isClosed {
                 Image(systemName: "moon.fill").imageScale(.small)
             }
-            Text(visibleText)
+            Text(visibleText).monospacedDigit()
         }
-        .fontWeight(isUnknown ? .regular : .semibold)
-        .foregroundStyle(color)
+        .fontWeight(isClosed ? .medium : .regular)
+        .foregroundStyle(isClosed ? ColorTokens.textPrimary : ColorTokens.textSecondary)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(spokenText)
     }
@@ -27,16 +28,6 @@ public struct HoursLabel: View {
     private var isClosed: Bool {
         if case .closed = summary.status { return true }
         return false
-    }
-
-    private var isUnknown: Bool { summary.status == .unknown }
-
-    private var color: Color {
-        switch summary.status {
-        case .alwaysOpen, .open: ColorTokens.open
-        case .closed: ColorTokens.closed
-        case .unknown: ColorTokens.textSecondary
-        }
     }
 
     private var visibleText: String {

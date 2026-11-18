@@ -55,6 +55,8 @@ actor FakeCache: StationCacheRepository {
     var stored: [ProvinceID: [Station]] = [:]
     var freshnessByProvince: [ProvinceID: Freshness] = [:]
     var knownDays: Set<Date> = []
+    var stationHistory: [HistoryPoint] = []
+    var areaPoints: [HistoryPoint] = []
     private(set) var savedHistory: [Date] = []
 
     init(stored: [ProvinceID: [Station]] = [:], freshness: [ProvinceID: Freshness] = [:], knownDays: Set<Date> = []) {
@@ -70,10 +72,21 @@ actor FakeCache: StationCacheRepository {
         freshnessByProvince[snapshot.provinceID] = Freshness(snapshotDate: snapshot.snapshotDate, fetchedAt: fetchedAt)
     }
     func freshness(of province: ProvinceID) async throws -> Freshness? { freshnessByProvince[province] }
-    func history(station: StationID, product: Product, since day: Date) async throws -> [HistoryPoint] { [] }
-    func areaHistory(provinces: [ProvinceID], product: Product, since day: Date) async throws -> [HistoryPoint] { [] }
+    func setHistory(_ points: [HistoryPoint], area: [HistoryPoint]) {
+        stationHistory = points
+        areaPoints = area
+    }
+    func history(station: StationID, product: Product, since day: Date) async throws -> [HistoryPoint] {
+        stationHistory.filter { $0.day >= day }
+    }
+    func areaHistory(provinces: [ProvinceID], product: Product, since day: Date) async throws -> [HistoryPoint] {
+        areaPoints.filter { $0.day >= day }
+    }
     func historyDays(province: ProvinceID, product: Product, since day: Date) async throws -> Set<Date> { knownDays }
-    func save(_ history: HistorySnapshot) async throws { savedHistory.append(history.day) }
+    func save(_ history: HistorySnapshot) async throws {
+        savedHistory.append(history.day)
+        knownDays.insert(history.day)
+    }
     func deleteHistory(before day: Date) async throws {}
     func changes() async -> AsyncStream<Void> { AsyncStream { $0.finish() } }
 }
@@ -84,8 +97,10 @@ actor FakeFavorites: FavoriteStationsRepository {
         entries = ids.enumerated().map { FavoriteEntry(stationID: StationID($1), provinceID: ProvinceID("28"), order: $0) }
     }
     func favorites() async throws -> [FavoriteEntry] { entries }
-    func add(_ station: StationID, province: ProvinceID) async throws {}
-    func remove(_ station: StationID) async throws {}
+    func add(_ station: StationID, province: ProvinceID) async throws {
+        entries.append(FavoriteEntry(stationID: station, provinceID: province, order: entries.count))
+    }
+    func remove(_ station: StationID) async throws { entries.removeAll { $0.stationID == station } }
     func move(from source: Int, to destination: Int) async throws {}
     func changes() async -> AsyncStream<[FavoriteEntry]> { AsyncStream { $0.finish() } }
     func iCloudStatus() async -> AsyncStream<ICloudStatus> { AsyncStream { $0.finish() } }
@@ -94,4 +109,30 @@ actor FakeFavorites: FavoriteStationsRepository {
 final class FakeWidgets: WidgetRefreshing, @unchecked Sendable {
     private(set) var reloads = 0
     func reloadAll() { reloads += 1 }
+}
+
+struct FakeProvinces: ProvinceRepository {
+    var municipalities: [Municipality] = []
+    func allProvinces() async -> [Province] { [] }
+    func province(at coordinate: Coordinate) async -> ProvinceID? { ProvinceID("28") }
+    func provinces(intersecting bounds: BoundingBox) async -> [ProvinceID] { [ProvinceID("28")] }
+    func municipalities(matching text: String) async -> [Municipality] {
+        municipalities.filter { SearchStations.fold($0.name).contains(SearchStations.fold(text)) }
+    }
+}
+
+extension Fixtures {
+    /// A station with a name, town and postcode of its own, for search and favourites.
+    static func named(_ id: String, _ name: String, diesel: String, locality: String = "Madrid", postcode: String = "28005",
+                      province: String = "28", metersNorth: Double = 0) -> Station {
+        let base = station(id, diesel: diesel, province: province)
+        return Station(
+            id: base.id, name: name,
+            address: Address(street: "C/ Test, \(id)", postcode: postcode, locality: locality, municipality: locality,
+                             province: "Madrid"),
+            coordinate: Coordinate(latitude: 40.4169 + metersNorth / 111_000, longitude: -3.7035),
+            roadSide: .notApplicable, hours: base.hours, provinceID: base.provinceID,
+            municipalityID: base.municipalityID, prices: base.prices
+        )
+    }
 }

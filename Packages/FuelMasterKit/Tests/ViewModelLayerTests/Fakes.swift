@@ -64,7 +64,8 @@ actor FakeRemote: StationRemoteRepository {
     }
 
     func history(province: ProvinceID, product: Product, day: Date) async throws -> HistorySnapshot {
-        HistorySnapshot(provinceID: province, product: product, day: day, prices: [:])
+        if let error { throw error }
+        return HistorySnapshot(provinceID: province, product: product, day: day, prices: [:])
     }
 }
 
@@ -86,7 +87,12 @@ actor FakeCache: StationCacheRepository {
         for continuation in continuations { continuation.yield() }
     }
     func freshness(of province: ProvinceID) async throws -> Freshness? { freshnessByProvince[province] }
-    func history(station: StationID, product: Product, since day: Date) async throws -> [HistoryPoint] { [] }
+    /// Daily prices per fuel, the same for every station.
+    var historyByProduct: [Product: [HistoryPoint]] = [:]
+    func setHistory(_ points: [HistoryPoint], for product: Product) { historyByProduct[product] = points }
+    func history(station: StationID, product: Product, since day: Date) async throws -> [HistoryPoint] {
+        (historyByProduct[product] ?? []).filter { $0.day >= day }
+    }
     func areaHistory(provinces: [ProvinceID], product: Product, since day: Date) async throws -> [HistoryPoint] { [] }
     func historyDays(province: ProvinceID, product: Product, since day: Date) async throws -> Set<Date> { [] }
     func save(_ history: HistorySnapshot) async throws {}
@@ -99,11 +105,28 @@ actor FakeCache: StationCacheRepository {
 }
 
 actor FakeFavorites: FavoriteStationsRepository {
-    func favorites() async throws -> [FavoriteEntry] { [] }
-    func add(_ station: StationID, province: ProvinceID) async throws {}
-    func remove(_ station: StationID) async throws {}
-    func move(from source: Int, to destination: Int) async throws {}
-    func changes() async -> AsyncStream<[FavoriteEntry]> { AsyncStream { _ in } }
+    private(set) var entries: [FavoriteEntry] = []
+    private var continuations: [AsyncStream<[FavoriteEntry]>.Continuation] = []
+
+    func favorites() async throws -> [FavoriteEntry] { entries }
+    func add(_ station: StationID, province: ProvinceID) async throws {
+        entries.append(FavoriteEntry(stationID: station, provinceID: province, order: entries.count))
+        for continuation in continuations { continuation.yield(entries) }
+    }
+    func remove(_ station: StationID) async throws {
+        entries.removeAll { $0.stationID == station }
+        for continuation in continuations { continuation.yield(entries) }
+    }
+    func move(from source: Int, to destination: Int) async throws {
+        let entry = entries.remove(at: source)
+        entries.insert(entry, at: min(max(0, destination), entries.count))
+        for continuation in continuations { continuation.yield(entries) }
+    }
+    func changes() async -> AsyncStream<[FavoriteEntry]> {
+        let (stream, continuation) = AsyncStream<[FavoriteEntry]>.makeStream()
+        continuations.append(continuation)
+        return stream
+    }
     func iCloudStatus() async -> AsyncStream<ICloudStatus> { AsyncStream { _ in } }
 }
 
@@ -162,6 +185,7 @@ struct ListHarness {
     let cache: FakeCache
     let settings: FakeSettings
     let connectivity = FakeConnectivity()
+    let favorites = FakeFavorites()
     let viewModel: StationListViewModel
 
     init(cached: [Station]? = nil, remote stations: [Station] = [], remoteError: DomainError? = nil,
@@ -179,13 +203,14 @@ struct ListHarness {
         )
         self.settings = FakeSettings(settings)
         viewModel = StationListViewModel(
-            observeNearby: ObserveNearbyStations(cache: cache, favorites: FakeFavorites(), now: { now }),
+            observeNearby: ObserveNearbyStations(cache: cache, favorites: favorites, now: { now }),
             refreshPrices: RefreshPrices(remote: remote, cache: cache, now: { now }),
             resolveProvinces: ResolveProvinces(provinces: FakeProvinces()),
             observeConnectivity: ObserveConnectivity(connectivity: connectivity),
             observeSettings: ObserveSettings(settings: self.settings),
             updateSettings: UpdateSettings(settings: self.settings),
             locateUser: LocateUser(location: location, firstFixTimeout: firstFixTimeout),
+            toggleFavorite: ToggleFavorite(favorites: favorites),
             format: DisplayFormat(locale: Locale(identifier: "es_ES")),
             now: { now }
         )
@@ -234,7 +259,6 @@ struct MapHarness {
             observeSettings: ObserveSettings(settings: settings),
             updateSettings: UpdateSettings(settings: settings),
             locateUser: LocateUser(location: location, firstFixTimeout: firstFixTimeout),
-            format: DisplayFormat(locale: Locale(identifier: "es_ES")),
             settleDelay: .zero,
             now: { now }
         )
@@ -245,5 +269,126 @@ struct MapHarness {
             if condition(viewModel) { return }
             try? await Task.sleep(for: .milliseconds(10))
         }
+    }
+}
+
+/// Everything a StationDetailViewModel needs, with handles on the fakes.
+@MainActor
+struct DetailHarness {
+    let remote: FakeRemote
+    let cache: FakeCache
+    let favorites = FakeFavorites()
+    let settings: FakeSettings
+    let viewModel: StationDetailViewModel
+
+    init(stations: [Station], remoteError: DomainError? = nil, settings: Settings = .default) {
+        let now = ListHarness.now
+        remote = FakeRemote(error: remoteError)
+        cache = FakeCache(stored: [ProvinceID("28"): stations],
+                          freshness: [ProvinceID("28"): Freshness(snapshotDate: now.addingTimeInterval(-12 * 60), fetchedAt: now)])
+        self.settings = FakeSettings(settings)
+        viewModel = StationDetailViewModel(
+            getDetail: GetStationDetail(cache: cache, favorites: favorites, now: { now }),
+            getHistory: GetPriceHistory(cache: cache, backfill: BackfillHistory(remote: remote, cache: cache, now: { now }),
+                                        now: { now }),
+            toggleFavorite: ToggleFavorite(favorites: favorites),
+            observeSettings: ObserveSettings(settings: self.settings),
+            locateUser: LocateUser(location: FakeLocation(), firstFixTimeout: .milliseconds(100)),
+            format: DisplayFormat(locale: Locale(identifier: "es_ES")),
+            now: { now }
+        )
+    }
+
+    func waitUntil(_ condition: @MainActor (StationDetailViewModel) -> Bool) async {
+        for _ in 0..<200 {
+            if condition(viewModel) { return }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+}
+
+/// Everything a FavoritesViewModel needs, with handles on the fakes.
+@MainActor
+struct FavoritesHarness {
+    let remote: FakeRemote
+    let cache: FakeCache
+    let favorites = FakeFavorites()
+    let viewModel: FavoritesViewModel
+
+    /// `remote` stations are what a province fetch returns; `cached` are there from the start.
+    init(cached: [Station] = [], remote stations: [Station] = []) {
+        let now = ListHarness.now
+        let madrid = ProvinceID("28")
+        remote = FakeRemote(snapshots: [madrid: ProvinceSnapshot(provinceID: madrid, stations: stations, snapshotDate: now)])
+        cache = FakeCache(stored: cached.isEmpty ? [:] : [madrid: cached],
+                          freshness: cached.isEmpty ? [:] : [madrid: Freshness(snapshotDate: now, fetchedAt: now)])
+        let settings = FakeSettings()
+        viewModel = FavoritesViewModel(
+            observeFavorites: ObserveFavorites(favorites: favorites, cache: cache, now: { now }),
+            toggleFavorite: ToggleFavorite(favorites: favorites),
+            reorderFavorites: ReorderFavorites(favorites: favorites),
+            observeICloudStatus: ObserveICloudStatus(favorites: favorites),
+            refreshPrices: RefreshPrices(remote: remote, cache: cache, now: { now }),
+            backfillHistory: BackfillHistory(remote: remote, cache: cache, now: { now }),
+            observeSettings: ObserveSettings(settings: settings),
+            locateUser: LocateUser(location: FakeLocation(), firstFixTimeout: .milliseconds(100)),
+            format: DisplayFormat(locale: Locale(identifier: "es_ES")),
+            now: { now }
+        )
+    }
+
+    func waitUntil(_ condition: @MainActor (FavoritesViewModel) -> Bool) async {
+        for _ in 0..<200 {
+            if condition(viewModel) { return }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+}
+
+/// Everything a SearchViewModel needs, with handles on the fakes.
+@MainActor
+struct SearchHarness {
+    let remote: FakeRemote
+    let cache: FakeCache
+    let favorites = FakeFavorites()
+    let viewModel: SearchViewModel
+
+    init(cached: [Station], remoteError: DomainError? = nil, location: FakeLocation = FakeLocation()) {
+        let now = ListHarness.now
+        let madrid = ProvinceID("28")
+        remote = FakeRemote(error: remoteError)
+        cache = FakeCache(stored: cached.isEmpty ? [:] : [madrid: cached],
+                          freshness: cached.isEmpty ? [:] : [madrid: Freshness(snapshotDate: now, fetchedAt: now)])
+        let settings = FakeSettings()
+        viewModel = SearchViewModel(
+            searchStations: SearchStations(cache: cache, provinces: FakeProvinces(), favorites: favorites,
+                                           refreshPrices: RefreshPrices(remote: remote, cache: cache, now: { now }), now: { now }),
+            resolveProvinces: ResolveProvinces(provinces: FakeProvinces()),
+            toggleFavorite: ToggleFavorite(favorites: favorites),
+            observeSettings: ObserveSettings(settings: settings),
+            locateUser: LocateUser(location: location, firstFixTimeout: .milliseconds(100)),
+            format: DisplayFormat(locale: Locale(identifier: "es_ES")),
+            debounce: .zero,
+            now: { now }
+        )
+    }
+
+    func waitUntil(_ condition: @MainActor (SearchViewModel) -> Bool) async {
+        for _ in 0..<200 {
+            if condition(viewModel) { return }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+}
+
+extension Fixtures {
+    static func branded(_ id: String, _ name: String, diesel: String, metersNorth: Double = 500,
+                        postcode: String = "28001") -> Station {
+        let base = station(id, diesel: diesel, metersNorth: metersNorth)
+        return Station(id: base.id, name: name,
+                       address: Address(street: base.address.street, postcode: postcode, locality: "Madrid",
+                                        municipality: "Madrid", province: "Madrid"),
+                       coordinate: base.coordinate, roadSide: .notApplicable, hours: base.hours,
+                       provinceID: base.provinceID, municipalityID: base.municipalityID, prices: base.prices)
     }
 }

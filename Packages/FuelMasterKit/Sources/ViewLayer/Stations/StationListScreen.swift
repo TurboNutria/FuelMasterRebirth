@@ -18,27 +18,33 @@ public struct StationListScreen: View {
     public var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    if typeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 16) {
+                    if router.layoutMode == .sideBySide {
+                        // Side by side has no room for the title; the tab switcher names the screen.
+                        HStack(spacing: 20) { fuelMenu; Spacer(minLength: 8); CompactFilters(viewModel: viewModel) }
+                            .padding(.top, 4)
+                    } else if typeSize.isAccessibilitySize {
                         // Canvas "Texto muy grande": title alone, then the fuel and one filters button.
                         title
                         ViewThatFits(in: .horizontal) {
-                            HStack(spacing: 12) { fuelMenu; CompactFilters(viewModel: viewModel) }
+                            HStack(spacing: 20) { fuelMenu; CompactFilters(viewModel: viewModel) }
                             VStack(alignment: .leading, spacing: 12) { fuelMenu; CompactFilters(viewModel: viewModel) }
                         }
                     } else {
-                        HStack(alignment: .lastTextBaseline) {
+                        HStack(alignment: .firstTextBaseline, spacing: 20) {
                             title
                             Spacer(minLength: 8)
                             fuelMenu
+                            LevelMenu(selection: $viewModel.levelFilter)
                         }
                         SortPicker(sort: $viewModel.sort)
-                        LevelChips(selection: $viewModel.levelFilter)
                     }
-                    ListHeader(viewModel: viewModel)
-                    content
+                    VStack(alignment: .leading, spacing: 4) {
+                        ListHeader(viewModel: viewModel)
+                        content
+                    }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 20)
                 .padding(.bottom, 96)
             }
             .background(ColorTokens.background)
@@ -47,6 +53,9 @@ public struct StationListScreen: View {
             #if os(iOS)
             .toolbarVisibility(.hidden, for: .navigationBar)
             #endif
+            .navigationDestination(isPresented: router.detailPushBinding(on: .list)) {
+                DetailPane(presentation: .push)
+            }
         }
         .task { await viewModel.start() }
         .onChange(of: viewModel.state.content?.rows.count) { old, new in
@@ -69,7 +78,7 @@ public struct StationListScreen: View {
     }
 
     private var fuelMenu: some View {
-        FuelMenu(product: viewModel.product) { product in
+        FuelMenu(product: viewModel.product, products: viewModel.offeredProducts) { product in
             Task { await viewModel.select(product) }
         }
     }
@@ -83,7 +92,8 @@ public struct StationListScreen: View {
                 .padding(.top, 120)
                 .accessibilityLabel(Text("Cargando gasolineras", bundle: .module))
         case .content(let content), .updating(let content), .offline(let content, _):
-            StationCard(rows: content.rows) { router.select($0) }
+            StationCard(rows: content.rows, onSelect: { router.select($0) },
+                        onToggleFavorite: { summary in Task { await viewModel.toggleFavorite(summary) } })
         case .empty(let reason):
             EmptyListView(reason: reason, showsMapAction: router.layoutMode.hasMapTab,
                           onShowMap: { router.selectedTab = .map },
@@ -118,26 +128,22 @@ public struct StationListScreen: View {
 /// "Diésel ⌄": the fuel picker as a glass capsule menu.
 struct FuelMenu: View {
     let product: Product
+    let products: [Product]
     let onSelect: (Product) -> Void
 
     var body: some View {
         Menu {
-            ForEach(Product.allCases) { option in
-                Button {
-                    onSelect(option)
-                } label: {
-                    if option == product {
-                        Label { Text(option.displayName) } icon: { Image(systemName: "checkmark") }
-                    } else {
-                        Text(option.displayName)
-                    }
-                }
+            // A picker, so the system draws the tick in its own column and the names stay aligned.
+            Picker(selection: Binding(get: { product }, set: onSelect)) {
+                ForEach(products) { Text($0.displayName).tag($0) }
+            } label: {
+                Text("Combustible", bundle: .module)
             }
         } label: {
             Label { Text(product.displayName).lineLimit(1) } icon: { Image(systemName: "chevron.down") }
                 .labelStyle(.trailingIcon)
         }
-        .accentGlassMenu()
+        .plainAccentMenu()
         .accessibilityLabel(Text("Combustible", bundle: .module))
         .accessibilityValue(Text(product.displayName))
     }
@@ -158,33 +164,23 @@ struct SortPicker: View {
     }
 }
 
-/// "Todas · Baratas · Medias · Caras": black when selected, outlined otherwise.
-struct LevelChips: View {
+/// The level filter as one glass menu, for when the chips don't fit.
+struct LevelMenu: View {
     @Binding var selection: LevelFilter
 
     var body: some View {
-        HStack(spacing: 8) {
-            ForEach(LevelFilter.allCases, id: \.self) { filter in
-                let isSelected = selection == filter
-                Button {
-                    selection = filter
-                } label: {
-                    filter.title
-                        .font(.footnote.weight(isSelected ? .semibold : .medium))
-                        .foregroundStyle(isSelected ? ColorTokens.background : ColorTokens.textPrimary)
-                        .padding(.horizontal, 12)
-                        .frame(minHeight: 32)
-                        .background(isSelected ? ColorTokens.textPrimary : ColorTokens.surface, in: .capsule)
-                        .overlay {
-                            if !isSelected { Capsule().strokeBorder(ColorTokens.chipBorder, lineWidth: 1) }
-                        }
-                }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(isSelected ? .isSelected : [])
+        Menu {
+            Picker(selection: $selection) {
+                ForEach(LevelFilter.allCases, id: \.self) { $0.title.tag($0) }
+            } label: {
+                Text("Filtro de precio", bundle: .module)
             }
+        } label: {
+            FilterIcon(isActive: selection != .all)
         }
-        .accessibilityElement(children: .contain)
+        .plainAccentMenu()
         .accessibilityLabel(Text("Filtro de precio", bundle: .module))
+        .accessibilityValue(selection.title)
     }
 }
 
@@ -206,13 +202,25 @@ struct CompactFilters: View {
                 Text("Filtro de precio", bundle: .module)
             }
         } label: {
-            Label { Text("Filtros", bundle: .module) } icon: { Image(systemName: "line.3.horizontal.decrease") }
+            FilterIcon(isActive: viewModel.levelFilter != .all)
         }
-        .accentGlassMenu()
+        .plainAccentMenu()
+        .accessibilityLabel(Text("Filtros", bundle: .module))
+        .accessibilityValue(viewModel.levelFilter.title)
     }
 }
 
-/// "Cerca de ti · 3 km · 23 estaciones" on the left, "Hace 12 min" on the right.
+/// The filter icon on its own, filled while a level filter is on (QA 2026-10-29: no label).
+struct FilterIcon: View {
+    let isActive: Bool
+
+    var body: some View {
+        Image(systemName: isActive ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease")
+            .frame(minWidth: 20)
+    }
+}
+
+/// "Cerca de ti · 3 km · 23 estaciones".
 struct ListHeader: View {
     let viewModel: StationListViewModel
 
@@ -220,20 +228,9 @@ struct ListHeader: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(area)
-            Spacer(minLength: 8)
-            if let date = viewModel.pricesDate {
-                // Re-evaluated every minute so "Hace 12 min" keeps up.
-                TimelineView(.everyMinute) { context in
-                    Text(format.relativeTime(date, now: context.date))
-                }
-            }
-        }
-        .font(.caption)
-        .foregroundStyle(ColorTokens.textSecondary)
-        .padding(.horizontal, 4)
-        .padding(.top, 4)
+        Text(area)
+            .font(.footnote)
+            .foregroundStyle(ColorTokens.textSecondary)
     }
 
     private var area: String {
@@ -245,7 +242,7 @@ struct ListHeader: View {
         switch viewModel.scope {
         case .nearby(let radius):
             parts.append(String(localized: "Cerca de ti", bundle: .module))
-            parts.append(format.distance(meters: radius))
+            parts.append(format.radius(meters: radius))
         case .province(let name):
             parts.append(String(localized: "En \(name)", bundle: .module, comment: "Header without location: En Madrid"))
         case nil:
@@ -256,10 +253,11 @@ struct ListHeader: View {
     }
 }
 
-/// The white card of rows with separators inset past the brand badge.
+/// The rows, straight on the background with hairlines between them.
 struct StationCard: View {
     let rows: [StationListRow]
     let onSelect: (StationID) -> Void
+    let onToggleFavorite: (StationSummary) -> Void
 
     var body: some View {
         LazyVStack(spacing: 0) {
@@ -268,20 +266,15 @@ struct StationCard: View {
                     onSelect(row.id)
                 } label: {
                     StationRow(row.summary, hours: row.hours)
-                        .padding(.horizontal, 14)
                 }
                 .buttonStyle(.plain)
+                .stationRowActions(row.summary.station, isFavorite: row.summary.isFavorite) {
+                    onToggleFavorite(row.summary)
+                }
                 if row.id != rows.last?.id {
-                    Rectangle()
-                        .fill(ColorTokens.separator)
-                        .frame(height: 1)
-                        .padding(.leading, 66)
+                    RowSeparator()
                 }
             }
-        }
-        .background(ColorTokens.surface, in: .rect(cornerRadius: 18))
-        .overlay {
-            RoundedRectangle(cornerRadius: 18).strokeBorder(ColorTokens.separator, lineWidth: 1)
         }
     }
 }

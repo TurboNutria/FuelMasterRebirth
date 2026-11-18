@@ -48,7 +48,16 @@ public struct Settings: Hashable, Sendable, Codable {
     public var lastViewedProvinceID: ProvinceID?
     public var onboardingCompleted: Bool
 
-    public static let tankSizeRange: ClosedRange<Decimal> = 20...150
+    /// No real lower limit (motorbikes, small LPG tanks): just not zero, which has no cost to show.
+    public static let tankSizeRange: ClosedRange<Decimal> = 1...150
+
+    /// Whole litres (or kilograms) within `tankSizeRange`.
+    public static func clampedTankSize(_ size: Decimal) -> Decimal {
+        var value = size
+        var rounded = Decimal()
+        NSDecimalRound(&rounded, &value, 0, .plain)
+        return min(max(rounded, tankSizeRange.lowerBound), tankSizeRange.upperBound)
+    }
 
     public static let `default` = Settings(
         product: .diesel, tankSize: 55, accent: .preset(.orange), priceScale: .trafficLight,

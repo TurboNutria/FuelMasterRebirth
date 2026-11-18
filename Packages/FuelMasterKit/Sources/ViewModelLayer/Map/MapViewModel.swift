@@ -2,18 +2,8 @@ import DomainLayer
 import Foundation
 import Observation
 
-/// "La más barata cerca": the cheapest station within 3 km of the user (or of the map centre).
-public struct CheapestNearby: Sendable, Equatable {
-    public let summary: StationSummary
-    public let hours: HoursSummary
-    /// Average minus price: positive means below the average ("0,065 € bajo la media").
-    public let belowAverage: Decimal?
-    public let radius: Double
-}
-
 public struct MapContent: Sendable, Equatable {
     public let pins: [StationPin]
-    public let cheapest: CheapestNearby?
     public let average: Decimal?
     public let pricesDate: Date?
 }
@@ -22,17 +12,26 @@ public struct MapContent: Sendable, Equatable {
 public struct CameraMove: Sendable, Equatable {
     public let id: Int
     public let viewport: MapViewport
+    /// Camera height in metres, when the move restores an earlier camera. A viewport alone is
+    /// re-fitted to the map's shape, which zooms out a little on every layout change.
+    public let distance: Double?
 }
 
 /// Mapa (Bear note 07, section 5): price pins for the stations in view, loading the provinces the
-/// viewport touches, with overlap-only clustering and the cheapest-nearby card.
+/// viewport touches, with overlap-only clustering.
 @MainActor @Observable
 public final class MapViewModel {
-    public static let nearbyRadius: Double = 3000
     /// Wider than this and the map would need too many provinces; it asks the user to zoom in.
     public static let maximumSpan: Double = 1.6
     /// About 3 km around the user when the map opens.
     public static let initialSpan: Double = 0.06
+    /// Stations are loaded for an area this many times the visible one, and never smaller than
+    /// `minimumLoadedSpan` (about 11 km), so panning and zooming in show pins that are already
+    /// there instead of loading a handful at a time (QA 2026-11-11).
+    static let loadedAreaFactor: Double = 2
+    static let minimumLoadedSpan: Double = 0.1
+    /// Pins are drawn this far around the visible area: a screen in every direction.
+    static let drawnAreaFactor: Double = 3
 
     public private(set) var product: Product = .diesel
     public var levelFilter: LevelFilter = .all {
@@ -43,8 +42,11 @@ public final class MapViewModel {
         didSet { if userLocation != oldValue { observe() } }
     }
     public private(set) var cameraMove: CameraMove?
+    /// MapKit's user annotation asks for location by itself, so the map only adds it once allowed.
+    public private(set) var showsUserLocation = false
     /// The last settled viewport. Kept here so the map reopens where it was after a layout change.
     public private(set) var viewport: MapViewport?
+    private var cameraDistance: Double?
     /// Grey "---" pins from the bundled station samples, shown until prices arrive.
     public private(set) var placeholderPins: [StationPin] = []
 
@@ -55,6 +57,8 @@ public final class MapViewModel {
     private var connectivity: Connectivity = .online
     private var offlineDismissed = false
     private var provinces: [ProvinceID] = []
+    /// The area the current stations were loaded for.
+    private var loadedArea: MapViewport?
     private var mapWidth: Double = 390
     private var moveCount = 0
     /// MapKit reports a camera of its own before `start()` runs, so "has a viewport" isn't enough.
@@ -71,14 +75,13 @@ public final class MapViewModel {
     private let updateSettings: UpdateSettings
     private let locateUser: LocateUser
     private let clusterer = PinClusterer()
-    private let format: DisplayFormat
     private let settleDelay: Duration
     private let now: @Sendable () -> Date
 
     public init(observeNearby: ObserveNearbyStations, refreshPrices: RefreshPrices,
                 resolveProvinces: ResolveProvinces, observeConnectivity: ObserveConnectivity,
                 observeSettings: ObserveSettings, updateSettings: UpdateSettings, locateUser: LocateUser,
-                format: DisplayFormat = DisplayFormat(), settleDelay: Duration = .milliseconds(500),
+                settleDelay: Duration = .milliseconds(200),
                 now: @escaping @Sendable () -> Date = { .now }) {
         self.observeNearby = observeNearby
         self.refreshPrices = refreshPrices
@@ -87,12 +90,16 @@ public final class MapViewModel {
         self.observeSettings = observeSettings
         self.updateSettings = updateSettings
         self.locateUser = locateUser
-        self.format = format
         self.settleDelay = settleDelay
         self.now = now
     }
 
     // MARK: State
+
+    /// The fuels the menu offers: those with a station in view.
+    public var offeredProducts: [Product] {
+        Product.offered(from: result?.availableProducts ?? [], chosen: product)
+    }
 
     public var isZoomedOut: Bool { (viewport?.latitudeDelta ?? 0) > Self.maximumSpan }
 
@@ -119,12 +126,13 @@ public final class MapViewModel {
         let run = startCount
         let settings = await observeSettings.current()
         product = settings.product
+        showsUserLocation = await locateUser.status() == .authorized
         if !hasPlacedCamera {
             hasPlacedCamera = true
             await placeInitialCamera(settings: settings)
         } else if let viewport {
             // Back from another layout: resume where the map was.
-            move(to: viewport)
+            move(to: viewport, distance: cameraDistance)
         }
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.watchConnectivity() }
@@ -136,11 +144,18 @@ public final class MapViewModel {
         settling?.cancel()
     }
 
-    /// The camera stopped moving. Loads after a short pause so a pan doesn't fire a request per frame.
-    public func viewportChanged(_ viewport: MapViewport, width: Double) {
+    /// The camera stopped moving. Regroups the loaded pins for the new zoom at once, and loads
+    /// only when the map has left the loaded area, after a short pause so a pan doesn't fire a
+    /// request per frame.
+    public func viewportChanged(_ viewport: MapViewport, width: Double, distance: Double? = nil) {
         self.viewport = viewport
+        cameraDistance = distance
         mapWidth = width
         settling?.cancel()
+        if !isZoomedOut, let loadedArea, Self.covers(loadedArea, viewport) {
+            redrawPins()
+            return
+        }
         settling = Task { [settleDelay] in
             try? await Task.sleep(for: settleDelay)
             guard !Task.isCancelled else { return }
@@ -163,6 +178,7 @@ public final class MapViewModel {
 
     public func centerOnUser() async {
         if userLocation == nil, await locateUser.authorize() == .authorized {
+            showsUserLocation = true
             userLocation = await locateUser.firstFix()
         }
         guard let userLocation else { return }
@@ -185,7 +201,7 @@ public final class MapViewModel {
     // MARK: Loading
 
     private func placeInitialCamera(settings: Settings) async {
-        if await locateUser.authorize() == .authorized, let fix = await locateUser.firstFix() {
+        if await locateUser.status() == .authorized, let fix = await locateUser.firstFix() {
             userLocation = fix
             move(to: MapViewport(center: fix, latitudeDelta: Self.initialSpan, longitudeDelta: Self.initialSpan))
             return
@@ -196,9 +212,9 @@ public final class MapViewModel {
         move(to: MapViewport(center: province.bounds.center, latitudeDelta: 0.3, longitudeDelta: 0.3))
     }
 
-    private func move(to viewport: MapViewport) {
+    private func move(to viewport: MapViewport, distance: Double? = nil) {
         moveCount += 1
-        cameraMove = CameraMove(id: moveCount, viewport: viewport)
+        cameraMove = CameraMove(id: moveCount, viewport: viewport, distance: distance)
     }
 
     private func load() async {
@@ -206,7 +222,9 @@ public final class MapViewModel {
             observation?.cancel()
             return
         }
-        provinces = await resolveProvinces(viewport: viewport)
+        let area = Self.loadedArea(for: viewport)
+        provinces = await resolveProvinces(viewport: area)
+        loadedArea = area
         await updatePlaceholders(in: viewport)
         observe()
         await refresh()
@@ -222,8 +240,8 @@ public final class MapViewModel {
     }
 
     private var request: NearbyRequest? {
-        guard let viewport, !provinces.isEmpty else { return nil }
-        return NearbyRequest(provinces: provinces, area: .bounds(viewport.bounds), product: product,
+        guard let loadedArea, !provinces.isEmpty else { return nil }
+        return NearbyRequest(provinces: provinces, area: .bounds(loadedArea.bounds), product: product,
                              sort: .cheapest, levels: levelFilter.levels, origin: userLocation)
     }
 
@@ -244,29 +262,40 @@ public final class MapViewModel {
     }
 
     private func apply(_ result: NearbyResult, for request: NearbyRequest) {
-        guard request == self.request, let viewport else { return }
+        guard request == self.request else { return }
         self.result = result
-        let cheapest = cheapest(in: result, viewport: viewport)
+        redrawPins()
+    }
+
+    /// Groups the loaded stations for the current zoom. Only those within a screen of the visible
+    /// area become pins, so a street-level view doesn't carry a whole city's worth.
+    private func redrawPins() {
+        guard let result, let viewport else { return }
+        let drawn = MapViewport(center: viewport.center,
+                                latitudeDelta: viewport.latitudeDelta * Self.drawnAreaFactor,
+                                longitudeDelta: viewport.longitudeDelta * Self.drawnAreaFactor).bounds
+        let stations = result.stations.filter { drawn.contains($0.station.coordinate) }
         content = MapContent(
-            pins: clusterer.pins(for: result.stations, in: viewport, width: mapWidth, standalone: cheapest?.summary.id),
-            cheapest: cheapest,
+            pins: clusterer.pins(for: stations, in: viewport, width: mapWidth),
             average: result.summary?.average,
             pricesDate: result.freshness?.snapshotDate
         )
     }
 
-    /// Around the user when they're in view, otherwise around the map centre.
-    private func cheapest(in result: NearbyResult, viewport: MapViewport) -> CheapestNearby? {
-        let center = userLocation.flatMap { viewport.bounds.contains($0) ? $0 : nil } ?? viewport.center
-        guard let best = result.stations
-            .filter({ $0.station.coordinate.distance(to: center) <= Self.nearbyRadius })
-            .min(by: { $0.price.amount < $1.price.amount }) else { return nil }
-        return CheapestNearby(
-            summary: best,
-            hours: HoursText.summary(for: best.station.hours, status: best.openingStatus, at: now(), format: format),
-            belowAverage: result.summary.map { $0.average - best.price.amount },
-            radius: Self.nearbyRadius
-        )
+    static func loadedArea(for viewport: MapViewport) -> MapViewport {
+        MapViewport(center: viewport.center,
+                    latitudeDelta: max(viewport.latitudeDelta * loadedAreaFactor, minimumLoadedSpan),
+                    longitudeDelta: max(viewport.longitudeDelta * loadedAreaFactor, minimumLoadedSpan))
+    }
+
+    /// Whether `loaded` still serves `viewport`: the visible area is inside it, and it isn't so
+    /// much larger than a fresh load would be (after zooming far in) that it's worth trimming.
+    static func covers(_ loaded: MapViewport, _ viewport: MapViewport) -> Bool {
+        let outer = loaded.bounds, inner = viewport.bounds
+        let wanted = loadedArea(for: viewport)
+        return outer.minLatitude <= inner.minLatitude && outer.maxLatitude >= inner.maxLatitude
+            && outer.minLongitude <= inner.minLongitude && outer.maxLongitude >= inner.maxLongitude
+            && loaded.latitudeDelta <= wanted.latitudeDelta * 4
     }
 
     // MARK: Device and settings
@@ -290,7 +319,7 @@ public final class MapViewModel {
     }
 
     private func watchLocation() async {
-        guard await locateUser.authorize() == .authorized else { return }
+        guard await locateUser.status() == .authorized else { return }
         for await coordinate in await locateUser.updates() {
             guard let current = userLocation else {
                 // The first fix came after the map had fallen back to the default province.

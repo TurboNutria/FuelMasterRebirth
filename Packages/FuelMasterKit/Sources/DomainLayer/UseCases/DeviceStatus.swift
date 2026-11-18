@@ -13,7 +13,7 @@ public struct ObserveConnectivity: Sendable {
     }
 }
 
-/// Where the user is, for the list and the map. Asks for when-in-use permission the first time.
+/// Where the user is, for the list and the map. Permission is only asked for on a user action.
 /// Not in note 07's first list: added in U2 so view models don't reach the repository directly.
 public struct LocateUser: Sendable {
     private let location: any UserLocationRepository
@@ -24,9 +24,16 @@ public struct LocateUser: Sendable {
         self.firstFixTimeout = firstFixTimeout
     }
 
-    /// Asks for permission if it hasn't been asked yet, and reports the answer.
+    /// Asks for permission if it hasn't been asked yet, and reports the answer. Only for a user
+    /// action ("Usar mi ubicación", "Centrar en mi ubicación"); screens use `status()`.
     public func authorize() async -> LocationAuthorization {
         await location.requestAuthorization()
+    }
+
+    /// The current permission, without asking, so choosing a province in onboarding isn't
+    /// followed by a location prompt.
+    public func status() async -> LocationAuthorization {
+        await location.authorization()
     }
 
     public func updates() async -> AsyncStream<Coordinate> {

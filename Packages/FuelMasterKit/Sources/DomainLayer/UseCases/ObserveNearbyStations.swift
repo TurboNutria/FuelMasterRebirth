@@ -38,11 +38,16 @@ public struct NearbyResult: Sendable, Equatable {
     /// Average, min and max across the loaded provinces (not just the visible area).
     public let summary: AreaPriceSummary?
     public let freshness: Freshness?
+    /// The products at least one station in the requested area sells, whatever the request's
+    /// product and levels: the fuel menus offer only these.
+    public let availableProducts: Set<Product>
 
-    public init(stations: [StationSummary], summary: AreaPriceSummary?, freshness: Freshness?) {
+    public init(stations: [StationSummary], summary: AreaPriceSummary?, freshness: Freshness?,
+                availableProducts: Set<Product> = []) {
         self.stations = stations
         self.summary = summary
         self.freshness = freshness
+        self.availableProducts = availableProducts
     }
 
     public static let empty = NearbyResult(stations: [], summary: nil, freshness: nil)
@@ -83,15 +88,18 @@ public struct ObserveNearbyStations: Sendable {
     public func callAsFunction(_ request: NearbyRequest) -> AsyncStream<NearbyResult> {
         AsyncStream { continuation in
             let task = Task {
+                // Subscribe before the first read, so a province saved in between isn't missed.
+                let cacheChanges = await cache.changes()
+                let favoriteChanges = await favorites.changes()
                 if let first = try? await load(request) { continuation.yield(first) }
                 await withTaskGroup(of: Void.self) { group in
                     group.addTask {
-                        for await _ in await cache.changes() {
+                        for await _ in cacheChanges {
                             if let next = try? await load(request) { continuation.yield(next) }
                         }
                     }
                     group.addTask {
-                        for await _ in await favorites.changes() {
+                        for await _ in favoriteChanges {
                             if let next = try? await load(request) { continuation.yield(next) }
                         }
                     }
@@ -108,14 +116,16 @@ public struct ObserveNearbyStations: Sendable {
                                 snapshotDate: freshness?.snapshotDate)
         let moment = now()
         var summaries: [StationSummary] = []
+        var available: Set<Product> = []
         for station in stations {
-            guard let price = station.price(for: request.product) else { continue }
             switch request.area {
             case .bounds(let box):
                 guard box.contains(station.coordinate) else { continue }
             case .radius(let center, let meters):
                 guard station.coordinate.distance(to: center) <= meters else { continue }
             }
+            available.formUnion(station.prices.keys)
+            guard let price = station.price(for: request.product) else { continue }
             let level = summary.map { classify(price.amount, areaAverage: $0.average) } ?? .average
             guard request.levels.isEmpty || request.levels.contains(level) else { continue }
             summaries.append(StationSummary(
@@ -134,6 +144,6 @@ public struct ObserveNearbyStations: Sendable {
                 return (lhs.distance ?? .infinity) < (rhs.distance ?? .infinity)
             }
         }
-        return NearbyResult(stations: summaries, summary: summary, freshness: freshness)
+        return NearbyResult(stations: summaries, summary: summary, freshness: freshness, availableProducts: available)
     }
 }

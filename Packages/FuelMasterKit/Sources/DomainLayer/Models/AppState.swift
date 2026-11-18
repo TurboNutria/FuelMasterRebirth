@@ -1,6 +1,7 @@
 import Foundation
 
 public enum SearchScope: String, CaseIterable, Sendable {
+    /// Digits search postcodes; anything else, brands nearby plus localities anywhere.
     case all, brand, locality, postcode
 }
 
