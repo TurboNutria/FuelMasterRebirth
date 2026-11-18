@@ -38,6 +38,37 @@ struct AppRouterTests {
         #expect(router.selectedStationID == nil)
     }
 
+    @Test func detailRemembersWhereItCameFrom() {
+        let router = AppRouter()
+        router.select(station, from: .map)
+        #expect(router.detailOrigin == .map)
+        router.select(StationID("2909"))
+        #expect(router.detailOrigin == .list)
+        router.open(StationLink.url(for: station))
+        #expect(router.detailOrigin == .list)
+    }
+
+    @Test func showOnMapInTabsClosesTheDetailAndMarksThePin() {
+        let router = AppRouter(selectedTab: .list)
+        router.select(station)
+        router.showOnMap(station, keepsDetail: false)
+        #expect(router.selectedTab == .map)
+        #expect(router.selectedStationID == nil)
+        #expect(router.highlightedStationID == station)
+        // Picking another station drops the mark.
+        router.select(StationID("2909"), from: .map)
+        router.isDetailPresented = false
+        #expect(router.highlightedStationID == nil)
+    }
+
+    @Test func showOnMapBesideTheMapKeepsTheInspector() {
+        let router = AppRouter(selectedTab: .favorites, layoutMode: .split)
+        router.select(station)
+        router.showOnMap(station, keepsDetail: true)
+        #expect(router.selectedTab == .favorites)
+        #expect(router.selectedStationID == station)
+    }
+
     @Test func mapTabGivesWayToTheListOnLargeScreens() {
         let router = AppRouter(selectedTab: .map)
         router.layoutDidChange(to: .split)

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Grey icon, title, message and an optional glass action: "No hay gasolineras con GNL cerca",
+/// Grey icon, title, message and an optional tinted action: "No hay gasolineras con GNL cerca",
 /// "Aún no tienes favoritas", "Sin resultados para «28999»".
 public struct EmptyStateView: View {
     let systemImage: String
@@ -35,8 +35,10 @@ public struct EmptyStateView: View {
                 .foregroundStyle(ColorTokens.textSecondary)
         } actions: {
             if let actionTitle, let action {
+                // Plain tinted text: the action sits on the page, and glass is kept for controls
+                // floating over the map.
                 Button(actionTitle, action: action)
-                    .buttonStyle(.accentGlass)
+                    .buttonStyle(.plainAccent)
             }
         }
     }

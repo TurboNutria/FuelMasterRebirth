@@ -1,16 +1,17 @@
 {
-  "sourceLanguage": "es",
-  "strings": {
-    "No se pudo abrir la base de datos": {
-      "localizations": {
-        "en-GB": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couldn’t open the database"
+  "sourceLanguage" : "es",
+  "strings" : {
+    "No se pudo abrir la base de datos" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn’t open the database"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

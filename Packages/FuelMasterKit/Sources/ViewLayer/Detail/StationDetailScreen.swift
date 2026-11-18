@@ -1,3 +1,4 @@
+import Accessibility
 import Charts
 import DomainLayer
 import SwiftUI
@@ -20,6 +21,7 @@ struct StationDetailScreen: View {
     let presentation: DetailPresentation
 
     @Environment(AppRouter.self) private var router
+    @Environment(MapViewModel.self) private var map
     @Environment(\.displayFormat) private var format
     @Environment(\.accentColors) private var accent
 
@@ -53,14 +55,27 @@ struct StationDetailScreen: View {
             // on the window's, half over the map.
             .toolbar {
                 if presentation != .inspector {
+                    if showsMapButton {
+                        ToolbarItem(placement: .bottomBar) { mapButton(content.station) }
+                        ToolbarSpacer(.fixed, placement: .bottomBar)
+                    }
                     ToolbarItem(placement: .bottomBar) { directionsButton(content.station) }
                 }
             }
             .safeAreaInset(edge: .bottom) {
                 if presentation == .inspector {
-                    directionsButton(content.station)
-                        .controlSize(.large)
-                        .padding(.bottom, 12)
+                    GlassEffectContainer(spacing: 0) {
+                        HStack(spacing: 12) {
+                            if showsMapButton {
+                                mapButton(content.station)
+                                    .buttonStyle(.glass)
+                                    .buttonBorderShape(.circle)
+                            }
+                            directionsButton(content.station)
+                        }
+                    }
+                    .controlSize(.large)
+                    .padding(.bottom, 12)
                 }
             }
             #endif
@@ -73,6 +88,27 @@ struct StationDetailScreen: View {
         }
     }
 
+    /// Only when the detail came from a list: opened from a pin, the station is already on the map.
+    /// A pushed detail always comes from a list (the map tab has no stack).
+    private var showsMapButton: Bool {
+        presentation == .push || router.detailOrigin == .list
+    }
+
+    private func mapButton(_ station: Station) -> some View {
+        Button {
+            map.focus(on: station.coordinate)
+            router.showOnMap(station.id, keepsDetail: presentation == .inspector)
+        } label: {
+            // The bottom bar shows a Label as its icon alone, which is what this one wants.
+            Label { Text("Ver en el mapa", bundle: .module) } icon: { Image(systemName: "map") }
+                .labelStyle(.iconOnly)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(accent.tint)
+        }
+        .accessibilityIdentifier("showOnMap")
+        .accessibilityShowsLargeContentViewer()
+    }
+
     private func directionsButton(_ station: Station) -> some View {
         Button {
             station.openDirections()
@@ -81,6 +117,7 @@ struct StationDetailScreen: View {
             HStack(spacing: 8) {
                 Image(systemName: "location.north.fill")
                 Text("Cómo llegar", bundle: .module)
+                    .accessibilityIdentifier("directions")
             }
                 .font(.body.weight(.semibold))
                 .foregroundStyle(accent.onFill)
@@ -88,6 +125,8 @@ struct StationDetailScreen: View {
         }
         .buttonStyle(.glassProminent)
         .tint(accent.fill)
+        // The bottom bar caps its text size; holding the button shows it large instead.
+        .accessibilityShowsLargeContentViewer()
     }
 
     @ToolbarContentBuilder private var toolbar: some ToolbarContent {
@@ -131,15 +170,8 @@ struct StationDetailScreen: View {
         }
     }
 
-    /// «Ballenoil · Diésel 1,859 € · Ronda de Segovia, 37, 28005 Madrid»
     private func shareMessage(_ content: StationDetailContent) -> String {
-        let address = content.station.address
-        var parts = [content.station.name]
-        if let price = content.detail.price {
-            parts.append("\(String(localized: price.product.displayName)) \(format.priceWithCurrency(price.amount))")
-        }
-        parts.append("\(address.street), \(address.postcode) \(address.locality)")
-        return parts.joined(separator: " · ")
+        StationShare.message(content.station, price: content.detail.price, format: format)
     }
 }
 
@@ -197,14 +229,27 @@ struct DetailHeader: View {
             HStack(spacing: 0) {
                 HoursLabel(content.hours)
                 if let distance = content.detail.distance {
-                    Text(verbatim: " · ")
-                    Text("a \(format.distance(meters: distance))", bundle: .module, comment: "Distance inside a sentence: a 1,4 km")
+                    // One run of text with the dot, as in the rows: a lone "·" fails the contrast check.
+                    (Text(verbatim: " · ")
+                        + Text("a \(format.distance(meters: distance))", bundle: .module, comment: "Distance inside a sentence: a 1,4 km"))
                         .monospacedDigit()
                 }
             }
             .foregroundStyle(ColorTokens.textSecondary)
+            // One sentence for VoiceOver, without the "·" read as its own item.
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: hoursAndDistanceSpoken))
+            .accessibilityAddTraits(.isStaticText)
         }
         .font(.subheadline)
+    }
+
+    /// «Abierta 24 horas, a 1,4 km».
+    private var hoursAndDistanceSpoken: String {
+        let hours = HoursLabel(content.hours).spokenText
+        guard let distance = content.detail.distance else { return hours }
+        return "\(hours), " + String(localized: "a \(format.distance(meters: distance))", bundle: .module,
+                                     comment: "Distance inside a sentence: a 1,4 km")
     }
 
     private var addressLine: String {
@@ -220,6 +265,7 @@ struct PriceCard: View {
 
     @Environment(\.displayFormat) private var format
     @Environment(\.priceScale) private var scale
+    @Environment(\.dynamicTypeSize) private var typeSize
     /// 44 pt at the default size, as in Favoritos, growing with Dynamic Type.
     @ScaledMetric(relativeTo: .largeTitle) private var priceSize: CGFloat = 44
 
@@ -299,17 +345,16 @@ struct PriceCard: View {
             .font(.system(.title3, design: .rounded, weight: .semibold))
             .monospacedDigit()
             .foregroundStyle(ColorTokens.textPrimary)
-            .lineLimit(1)
-        return ViewThatFits(in: .horizontal) {
-            HStack(alignment: .firstTextBaseline) {
-                label.lineLimit(1)
-                Spacer(minLength: 8)
-                amount
-            }
-            VStack(alignment: .leading, spacing: 4) {
-                label
-                amount
-            }
+            .fixedSize()
+        // Picked from the text size rather than ViewThatFits, which kept the one-line layout while
+        // the text grew and clipped both (accessibility audit).
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))
+        return layout {
+            label.fixedSize(horizontal: false, vertical: true)
+            if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
+            amount
         }
         .accessibilityElement(children: .combine)
     }
@@ -339,6 +384,7 @@ struct HistoryCard: View {
                 .frame(height: compact ? 100 : 160)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(Text(chartSummary))
+                .accessibilityChartDescriptor(audioGraph)
             legend
             if !compact { stats }
             if chart.isIncomplete && !chart.isLoading {
@@ -463,6 +509,13 @@ struct HistoryCard: View {
     }
 
     /// «Últimos 7 días: entre 1,859 € y 1,879 €. Media de Madrid entre 1,923 € y 1,928 €.»
+    /// Audio Graphs: VoiceOver can play the week as tones and step through each day.
+    private var audioGraph: HistoryAudioGraph {
+        HistoryAudioGraph(station: stationPoints, average: averagePoints, range: chart.range,
+                          summary: chartSummary, averageName: String(localized: "Media de \(provinceName)", bundle: .module),
+                          format: format)
+    }
+
     private var chartSummary: String {
         var parts: [String] = []
         if let minimum = chart.minimum, let maximum = chart.maximum {
@@ -476,6 +529,40 @@ struct HistoryCard: View {
                                 bundle: .module))
         }
         return parts.joined(separator: " ")
+    }
+}
+
+/// The 7-day chart as data, for VoiceOver's Audio Graphs.
+private struct HistoryAudioGraph: AXChartDescriptorRepresentable {
+    let station: [(day: Date, amount: Double)]
+    let average: [(day: Date, amount: Double)]
+    let range: ClosedRange<Double>
+    let summary: String
+    let averageName: String
+    let format: DisplayFormat
+
+    func makeChartDescriptor() -> AXChartDescriptor {
+        let days = Array(Set((station + average).map(\.day))).sorted()
+        let xAxis = AXCategoricalDataAxisDescriptor(title: String(localized: "Día", bundle: .module),
+                                                    categoryOrder: days.map(label))
+        let yAxis = AXNumericDataAxisDescriptor(title: String(localized: "Precio", bundle: .module), range: range,
+                                                gridlinePositions: []) { value in
+            format.priceWithCurrency(Decimal(value))
+        }
+        let series = [
+            AXDataSeriesDescriptor(name: String(localized: "Esta estación", bundle: .module), isContinuous: true,
+                                   dataPoints: station.map { AXDataPoint(x: label($0.day), y: $0.amount) }),
+            AXDataSeriesDescriptor(name: averageName, isContinuous: true,
+                                   dataPoints: average.map { AXDataPoint(x: label($0.day), y: $0.amount) }),
+        ]
+        return AXChartDescriptor(title: String(localized: "Últimos 7 días", bundle: .module), summary: summary,
+                                 xAxis: xAxis, yAxis: yAxis, additionalAxes: [], series: series)
+    }
+
+    private func label(_ day: Date) -> String {
+        var style = Date.FormatStyle(date: .abbreviated, time: .omitted, locale: format.locale)
+        style.timeZone = HoursText.stationTimeZone
+        return day.formatted(style)
     }
 }
 

@@ -77,7 +77,8 @@ public struct StationRow: View {
             if summary.isFavorite, showsFavoriteStar {
                 Image(systemName: "star.fill")
                     .font(.caption)
-                    .foregroundStyle(accent.fill)
+                    // The tint, not the fill: the light orange fill is under 3:1 on the page.
+                    .foregroundStyle(accent.tint)
             }
         }
     }
@@ -86,9 +87,10 @@ public struct StationRow: View {
     /// on its own line below, wrapping rather than being cut to a few letters.
     private var detailLine: some View {
         ViewThatFits(in: .horizontal) {
+            // Ideal widths, not a line limit: ViewThatFits drops to two lines before anything is cut.
             HStack(spacing: 0) {
                 hoursAndDistance
-                Text(place(separated: true)).lineLimit(1)
+                Text(place(separated: true)).fixedSize()
             }
             VStack(alignment: .leading, spacing: 4) {
                 hoursAndDistance
@@ -107,7 +109,6 @@ public struct StationRow: View {
                 Text(verbatim: " · \(distance)").monospacedDigit()
             }
         }
-        .lineLimit(1)
         .fixedSize()
     }
 

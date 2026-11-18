@@ -12,6 +12,7 @@ public struct MapScreen: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.displayFormat) private var format
     @Environment(\.freeTopInset) private var freeTopInset
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     public init(viewModel: MapViewModel) {
         self.viewModel = viewModel
     }
@@ -20,7 +21,7 @@ public struct MapScreen: View {
         // The controls stay inside the safe area; only the map runs under it.
         Color.clear
             .background {
-                PinMap(pins: pins, highlightedID: router.selectedStationID, cameraMove: viewModel.cameraMove,
+                PinMap(pins: pins, highlightedID: router.highlightedStationID, cameraMove: viewModel.cameraMove,
                        showsUserLocation: viewModel.showsUserLocation,
                        onViewportChange: { viewport, width, distance in
                            viewModel.viewportChanged(viewport, width: width, distance: distance)
@@ -28,8 +29,10 @@ public struct MapScreen: View {
                        onTap: tap)
                     .ignoresSafeArea()
             }
-            .overlay(alignment: .top) { topControls }
-            .overlay(alignment: .bottom) { bottomStack }
+            // The controls over the map stop growing at the largest standard size, as in Maps, so
+            // the row fits; holding one shows it in the large content viewer.
+            .overlay(alignment: .top) { topControls.dynamicTypeSize(...DynamicTypeSize.xxxLarge) }
+            .overlay(alignment: .bottom) { bottomStack.dynamicTypeSize(...DynamicTypeSize.xxxLarge) }
             .task { await viewModel.start() }
     }
 
@@ -40,7 +43,7 @@ public struct MapScreen: View {
 
     private func tap(_ pin: StationPin) {
         switch pin {
-        case .station(let summary): router.select(summary.id)
+        case .station(let summary): router.select(summary.id, from: .map)
         case .cluster(_, _, let bounds): viewModel.zoom(into: bounds)
         case .placeholder: break
         }
@@ -49,30 +52,34 @@ public struct MapScreen: View {
     // MARK: Overlays
 
     private var topControls: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center, spacing: 8) {
-                Group {
-                    if !router.layoutMode.hasMapTab { panelButton }
-                    if router.showsMapMenus {
-                        MapFuelMenu(product: viewModel.product, products: viewModel.offeredProducts) { product in
-                            Task { await viewModel.select(product) }
+        // One container for the controls over the map, so their glass samples the map together.
+        // Spacing 0: they stay separate shapes rather than melting into each other.
+        GlassEffectContainer(spacing: 0) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
+                    Group {
+                        if !router.layoutMode.hasMapTab { panelButton }
+                        if router.showsMapMenus {
+                            MapFuelMenu(product: viewModel.product, products: viewModel.offeredProducts) { product in
+                                Task { await viewModel.select(product) }
+                            }
+                            MapLevelMenu(selection: $viewModel.levelFilter)
+                        } else {
+                            // A filter set before the list came back still applies, so it stays visible.
+                            if viewModel.levelFilter != .all { MapLevelMenu(selection: $viewModel.levelFilter) }
+                            // With the list beside the map its fuel and filters are already on screen,
+                            // so the pill takes their place instead of floating below.
+                            statusPill
                         }
-                        MapLevelMenu(selection: $viewModel.levelFilter)
-                    } else {
-                        // A filter set before the list came back still applies, so it stays visible.
-                        if viewModel.levelFilter != .all { MapLevelMenu(selection: $viewModel.levelFilter) }
-                        // With the list beside the map its fuel and filters are already on screen,
-                        // so the pill takes their place instead of floating below.
-                        statusPill
+                    }
+                    .offset(y: -leftControlsLift)
+                    Spacer(minLength: 8)
+                    GlassIconButton(systemImage: "location.fill", label: Text("Centrar en mi ubicación", bundle: .module)) {
+                        Task { await viewModel.centerOnUser() }
                     }
                 }
-                .offset(y: -leftControlsLift)
-                Spacer(minLength: 8)
-                GlassIconButton(systemImage: "location.fill", label: Text("Centrar en mi ubicación", bundle: .module)) {
-                    Task { await viewModel.centerOnUser() }
-                }
+                if router.showsMapMenus { statusPill.offset(y: -leftControlsLift) }
             }
-            if router.showsMapMenus { statusPill.offset(y: -leftControlsLift) }
         }
         .padding(.horizontal, 16)
         .padding(.top, 8)
@@ -88,7 +95,8 @@ public struct MapScreen: View {
     private var panelButton: some View {
         GlassIconButton(systemImage: "sidebar.left",
                         label: router.isPanelCollapsed ? Text("Mostrar lista", bundle: .module) : Text("Ocultar lista", bundle: .module)) {
-            withAnimation { router.isPanelCollapsed.toggle() }
+            // Reduce Motion: the panel appears and goes without sliding.
+            withAnimation(reduceMotion ? nil : .default) { router.isPanelCollapsed.toggle() }
         }
     }
 
@@ -104,7 +112,8 @@ public struct MapScreen: View {
         if let text {
             Text(text)
                 .font(.caption)
-                .lineLimit(1)
+                // Wraps at large text sizes rather than cutting the message.
+                .fixedSize(horizontal: false, vertical: true)
                 .foregroundStyle(ColorTokens.textSecondary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
@@ -142,11 +151,13 @@ struct MapFuelMenu: View {
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: "fuelpump")
-                Text(product.displayName).lineLimit(1)
+                // Grows with the text rather than truncating "Diésel Premium" (accessibility audit).
+                Text(product.displayName).fixedSize()
                 Image(systemName: "chevron.down").imageScale(.small)
             }
         }
         .mapControlMenu()
+        .accessibilityShowsLargeContentViewer()
         .accessibilityLabel(Text("Combustible", bundle: .module))
         .accessibilityValue(Text(product.displayName))
     }

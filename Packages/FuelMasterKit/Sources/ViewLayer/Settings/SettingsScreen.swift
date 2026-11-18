@@ -89,6 +89,8 @@ struct TankSizeRow: View {
     let onChange: (Decimal) -> Void
 
     @FocusState private var isFocused: Bool
+    /// Room for three digits, growing with the text size.
+    @ScaledMetric(relativeTo: .body) private var fieldWidth: CGFloat = 52
 
     var body: some View {
         LabeledContent {
@@ -100,7 +102,7 @@ struct TankSizeRow: View {
                 }
                 .multilineTextAlignment(.trailing)
                 .monospacedDigit()
-                .frame(width: 52)
+                .frame(width: fieldWidth)
                 .focused($isFocused)
                 #if os(iOS)
                 .keyboardType(.numberPad)

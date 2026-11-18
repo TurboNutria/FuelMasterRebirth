@@ -45,6 +45,9 @@ struct PinMap {
         coordinator.onTap = onTap
         // Without animation: there's nothing on screen yet to move from.
         coordinator.apply(cameraMove, to: mapView, animated: false)
+        #if canImport(UIKit)
+        mapView.accessibilityCustomRotors = [coordinator.priceRotor(for: mapView)]
+        #endif
         return mapView
     }
 
@@ -199,6 +202,38 @@ extension PinMap {
             images[key] = image
             return image
         }
+
+        // MARK: VoiceOver
+
+        #if canImport(UIKit)
+        /// «Gasolineras por precio»: the pins on screen from the cheapest to the dearest (canvas:
+        /// VoiceOver board). Groups count at their cheapest price; first-load pins are skipped.
+        func priceRotor(for mapView: MKMapView) -> UIAccessibilityCustomRotor {
+            UIAccessibilityCustomRotor(name: String(localized: "Gasolineras por precio", bundle: .module)) {
+                [weak self, weak mapView] predicate in
+                MainActor.assumeIsolated {
+                    guard let self, let mapView else { return nil }
+                    let views = self.visibleByPrice(on: mapView).compactMap { mapView.view(for: $0) }
+                    let current = (predicate.currentItem.targetElement as? MKAnnotationView).flatMap { views.firstIndex(of: $0) }
+                    let next: Int
+                    switch predicate.searchDirection {
+                    case .next: next = current.map { $0 + 1 } ?? 0
+                    case .previous: next = current.map { $0 - 1 } ?? views.count - 1
+                    @unknown default: return nil
+                    }
+                    guard views.indices.contains(next) else { return nil }
+                    return UIAccessibilityCustomRotorItemResult(targetElement: views[next], targetRange: nil)
+                }
+            }
+        }
+
+        private func visibleByPrice(on mapView: MKMapView) -> [PinAnnotation] {
+            let visible = mapView.annotations(in: mapView.visibleMapRect).compactMap { $0 as? PinAnnotation }
+            return visible.compactMap { annotation in annotation.pin.price.map { (annotation, $0) } }
+                .sorted { $0.1 < $1.1 }
+                .map(\.0)
+        }
+        #endif
 
         // MARK: Camera
 

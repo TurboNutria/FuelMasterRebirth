@@ -67,6 +67,10 @@ struct FuelMasterApp: App {
                     if UserDefaults.standard.bool(forKey: "FMSkipOnboarding") {
                         await dependencies.updateSettings { $0.onboardingCompleted = true }
                     }
+                    // `-FMResetOnboarding YES` shows onboarding again, for the UI tests.
+                    if UserDefaults.standard.bool(forKey: "FMResetOnboarding") {
+                        await dependencies.updateSettings { $0.onboardingCompleted = false }
+                    }
                     // `-FMSelectStation <IDEESS>` opens a station's detail at launch, for screenshots.
                     if let id = UserDefaults.standard.string(forKey: "FMSelectStation") {
                         router.select(StationID(id))

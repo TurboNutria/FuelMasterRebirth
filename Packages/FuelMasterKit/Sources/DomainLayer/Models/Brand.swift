@@ -4,7 +4,7 @@ import Foundation
 /// ALCOBENDAS", "Bonàrea"). Signs the app has no logo for give no brand.
 public enum Brand: String, CaseIterable, Sendable {
     case agla, alas, alcampo, autonet, avia, ballenoil, bonarea, bp, byEnergy, campsa, carrefour, cepsa
-    case costco, disa, eleclerc, eroski, esclatoil, galp, gasexpress, ham, meroil, naturgy, nieves
+    case costco, disa, eleclerc, eroski, esclatoil, galp, gasexpress, ham, meroil, moeve, naturgy, nieves
     case petrocat, petromiralles, petronor, petroprix, plenoil, q8, repsol, shell, supeco, tamoil, valcarce
 
     /// Whole words (or runs of words) of the sign that name the chain, in capitals without accents.
@@ -32,6 +32,7 @@ public enum Brand: String, CaseIterable, Sendable {
         case .gasexpress: [["GASEXPRESS"], ["GAS", "EXPRESS"]]
         case .ham: [["HAM"]]
         case .meroil: [["MEROIL"]]
+        case .moeve: [["MOEVE"]]
         case .naturgy: [["NATURGY"]]
         case .nieves: [["NIEVES"]]
         case .petrocat: [["PETROCAT"]]

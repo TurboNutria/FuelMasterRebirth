@@ -25,6 +25,8 @@ public final class MapViewModel {
     public static let maximumSpan: Double = 1.6
     /// About 3 km around the user when the map opens.
     public static let initialSpan: Double = 0.06
+    /// About 1 km around a station shown from a list.
+    public static let focusSpan: Double = 0.01
     /// Stations are loaded for an area this many times the visible one, and never smaller than
     /// `minimumLoadedSpan` (about 11 km), so panning and zooming in show pins that are already
     /// there instead of loading a handful at a time (QA 2026-11-11).
@@ -180,6 +182,13 @@ public final class MapViewModel {
     public func zoom(into bounds: BoundingBox) {
         let span = max(bounds.maxLatitude - bounds.minLatitude, bounds.maxLongitude - bounds.minLongitude) * 1.6
         move(to: MapViewport(center: bounds.center, latitudeDelta: max(span, 0.004), longitudeDelta: max(span, 0.004)))
+    }
+
+    /// "Ver en el mapa": close enough around the station for its pin to stand on its own.
+    public func focus(on coordinate: Coordinate) {
+        // Before the map's first `start()` this is the first position, not the user's area.
+        hasPlacedCamera = true
+        move(to: MapViewport(center: coordinate, latitudeDelta: Self.focusSpan, longitudeDelta: Self.focusSpan))
     }
 
     public func centerOnUser() async {

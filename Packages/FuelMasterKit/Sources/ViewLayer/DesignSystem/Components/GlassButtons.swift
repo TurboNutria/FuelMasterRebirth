@@ -1,21 +1,19 @@
 import SwiftUI
 
-/// Liquid Glass capsule tinted with the accent: the fuel picker ("Diésel ⌄"), "Ver en el mapa",
-/// "Cómo llegar". Reduce Transparency is handled by the system glass.
-public struct AccentGlassButtonStyle: PrimitiveButtonStyle {
+/// Tinted text for an action on the page (an empty state's "Ver todas"), at least 44 pt tall.
+/// Glass is for controls floating over the map.
+public struct PlainAccentButtonStyle: ButtonStyle {
     @Environment(\.accentColors) private var accent
 
     public init() {}
 
     public func makeBody(configuration: Configuration) -> some View {
-        Button(role: configuration.role, action: configuration.trigger) {
-            configuration.label
-                .font(.body.weight(.semibold))
-                .foregroundStyle(accent.tint)
-        }
-        .buttonStyle(.glass)
-        .tint(accent.fill.opacity(0.22))
-        .controlSize(.large)
+        configuration.label
+            .font(.body.weight(.semibold))
+            .foregroundStyle(accent.tint)
+            .frame(minHeight: 44)
+            .contentShape(.rect)
+            .opacity(configuration.isPressed ? 0.5 : 1)
     }
 }
 
@@ -46,21 +44,10 @@ public struct GlassIconButton: View {
         // About 44 pt overall, the height of the glass menus beside it (it was 56).
         .controlSize(.large)
         .accessibilityLabel(label)
-    }
-}
-
-/// The same accent glass capsule for a `Menu` label (menus don't take primitive button styles).
-struct AccentGlassMenu: ViewModifier {
-    @Environment(\.accentColors) private var accent
-
-    func body(content: Content) -> some View {
-        content
-            .font(.body.weight(.semibold))
-            .foregroundStyle(accent.tint)
-            .menuStyle(.button)
-            .buttonStyle(.glass)
-            .tint(accent.fill.opacity(0.22))
-            .controlSize(.large)
+        .accessibilityShowsLargeContentViewer {
+            Image(systemName: systemImage)
+            label
+        }
     }
 }
 
@@ -80,12 +67,11 @@ struct PlainAccentMenu: ViewModifier {
 }
 
 extension View {
-    func accentGlassMenu() -> some View { modifier(AccentGlassMenu()) }
     func plainAccentMenu() -> some View { modifier(PlainAccentMenu()) }
 }
 
-extension PrimitiveButtonStyle where Self == AccentGlassButtonStyle {
-    public static var accentGlass: AccentGlassButtonStyle { AccentGlassButtonStyle() }
+extension ButtonStyle where Self == PlainAccentButtonStyle {
+    public static var plainAccent: PlainAccentButtonStyle { PlainAccentButtonStyle() }
 }
 
 #Preview("Glass buttons") {
@@ -94,9 +80,9 @@ extension PrimitiveButtonStyle where Self == AccentGlassButtonStyle {
             Label { Text(verbatim: "Diésel") } icon: { Image(systemName: "chevron.down") }
                 .labelStyle(.trailingIcon)
         }
-        .buttonStyle(.accentGlass)
+        .buttonStyle(.plainAccent)
         Button(String(localized: "Ver en el mapa", bundle: .module)) {}
-            .buttonStyle(.accentGlass)
+            .buttonStyle(.plainAccent)
         GlassIconButton(systemImage: "location.fill", label: Text("Centrar en mi ubicación", bundle: .module)) {}
     }
     .padding(40)

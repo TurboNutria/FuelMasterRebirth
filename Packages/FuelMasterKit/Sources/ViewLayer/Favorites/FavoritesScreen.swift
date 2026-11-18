@@ -110,6 +110,12 @@ public struct FavoritesScreen: View {
             Section {
                 ForEach(content.rows) { row in
                     FavoriteRowView(row: row, product: viewModel.product) { router.select(row.id) }
+                        .modifier(FavoriteRowActions(station: row.item.station) {
+                            Task { await viewModel.remove(row.id) }
+                        })
+                        .modifier(FavoriteContextMenu(row: row,
+                                                      onRemove: { Task { await viewModel.remove(row.id) } },
+                                                      onOpen: { router.select(row.id) }))
                         // Hairlines end where the chips end, as in Gasolineras.
                         .alignmentGuide(.listRowSeparatorTrailing) { $0[.trailing] }
                         .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
@@ -124,9 +130,6 @@ public struct FavoritesScreen: View {
                                 Label { Text("Quitar", bundle: .module) } icon: { Image(systemName: "star.slash") }
                             }
                         }
-                        .modifier(FavoriteRowActions(station: row.item.station) {
-                            Task { await viewModel.remove(row.id) }
-                        })
                 }
                 .onMove { source, destination in
                     guard let from = source.first else { return }
@@ -270,6 +273,22 @@ struct FavoriteRowView: View {
         }
         .buttonStyle(.plain)
         .disabled(row.item.station == nil)
+    }
+}
+
+/// The peek and menu, once the favourite has a price to show.
+private struct FavoriteContextMenu: ViewModifier {
+    let row: FavoriteRow
+    let onRemove: () -> Void
+    let onOpen: () -> Void
+
+    func body(content: Content) -> some View {
+        if let summary = row.summary, let hours = row.hours {
+            content.stationContextMenu(summary, hours: hours, isFavorite: true,
+                                       onToggleFavorite: onRemove, onOpen: onOpen)
+        } else {
+            content
+        }
     }
 }
 

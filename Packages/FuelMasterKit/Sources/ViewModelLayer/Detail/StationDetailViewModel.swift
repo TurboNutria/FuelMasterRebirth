@@ -110,15 +110,7 @@ public final class StationDetailViewModel {
     }
 
     /// Apple Maps link for Compartir.
-    public var shareURL: URL? {
-        guard let station = detail?.station else { return nil }
-        var components = URLComponents(string: "https://maps.apple.com/")
-        components?.queryItems = [
-            URLQueryItem(name: "ll", value: "\(station.coordinate.latitude),\(station.coordinate.longitude)"),
-            URLQueryItem(name: "q", value: station.name),
-        ]
-        return components?.url
-    }
+    public var shareURL: URL? { detail?.station.shareURL }
 
     // MARK: Intents
 
@@ -234,5 +226,17 @@ public final class StationDetailViewModel {
             origin = coordinate
             observe()
         }
+    }
+}
+
+extension Station {
+    /// Apple Maps link for Compartir, in the detail and the rows' menu.
+    public var shareURL: URL? {
+        var components = URLComponents(string: "https://maps.apple.com/")
+        components?.queryItems = [
+            URLQueryItem(name: "ll", value: "\(coordinate.latitude),\(coordinate.longitude)"),
+            URLQueryItem(name: "q", value: name),
+        ]
+        return components?.url
     }
 }

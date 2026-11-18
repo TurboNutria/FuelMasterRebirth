@@ -10,9 +10,6 @@ struct MapPinView: View {
     let pin: StationPin
     let isHighlighted: Bool
 
-    @Environment(\.priceScale) private var scale
-    @Environment(\.displayFormat) private var format
-
     var body: some View {
         switch pin {
         case .station(let summary):
@@ -34,28 +31,7 @@ struct MapPinView: View {
     }
 
     private func highlighted(_ summary: StationSummary) -> some View {
-        let colors = PriceLevelColors.colors(for: summary.level, scale: scale)
-        return VStack(spacing: 0) {
-            HStack(spacing: 4) {
-                if let brand = summary.station.brand {
-                    BrandLogo(brand: brand, size: 24).padding(.leading, -8).padding(.trailing, 2)
-                }
-                if summary.level == .cheap { Image(systemName: "arrow.down").font(.caption.weight(.heavy)) }
-                Text(format.price(summary.price.amount))
-                    .font(.system(.callout, design: .rounded, weight: .bold))
-                    .monospacedDigit()
-            }
-            .foregroundStyle(colors.foreground)
-            .padding(.vertical, 6)
-            .padding(.horizontal, 12)
-            .background(colors.background, in: .capsule)
-            PinTail()
-                .fill(colors.background)
-                .frame(width: 14, height: 8)
-        }
-        // Its size and tail mark it; a neutral shadow lifts it off the map.
-        .compositingGroup()
-        .shadow(color: .black.opacity(0.2), radius: 6, y: 3)
+        HighlightedPin(amount: summary.price.amount, level: summary.level, brand: summary.station.brand)
     }
 
     /// A group of stations: a circle with how many there are, growing a little with the count. It
@@ -72,6 +48,41 @@ struct MapPinView: View {
     }
 }
 
+/// The large pin with a tail for the station whose detail is open; also the welcome step's art.
+struct HighlightedPin: View {
+    let amount: Decimal
+    let level: PriceLevel
+    var brand: Brand? = nil
+
+    @Environment(\.priceScale) private var scale
+    @Environment(\.displayFormat) private var format
+
+    var body: some View {
+        let colors = PriceLevelColors.colors(for: level, scale: scale)
+        VStack(spacing: 0) {
+            HStack(spacing: 4) {
+                if let brand {
+                    BrandLogo(brand: brand, size: 24).padding(.leading, -8).padding(.trailing, 2)
+                }
+                if level == .cheap { Image(systemName: "arrow.down").font(.caption.weight(.heavy)) }
+                Text(format.price(amount))
+                    .font(.system(.callout, design: .rounded, weight: .bold))
+                    .monospacedDigit()
+            }
+            .foregroundStyle(colors.foreground)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 12)
+            .background(colors.background, in: .capsule)
+            PinTail()
+                .fill(colors.background)
+                .frame(width: 14, height: 8)
+        }
+        // Its size and tail mark it; a neutral shadow lifts it off the map.
+        .compositingGroup()
+        .shadow(color: .black.opacity(0.2), radius: 6, y: 3)
+    }
+}
+
 /// The small downward triangle under the highlighted pin.
 struct PinTail: Shape {
     func path(in rect: CGRect) -> Path {
@@ -85,6 +96,15 @@ struct PinTail: Shape {
 }
 
 extension StationPin {
+    /// The price VoiceOver's rotor sorts by: a group's cheapest; none while loading.
+    var price: Decimal? {
+        switch self {
+        case .station(let summary): summary.price.amount
+        case .cluster(let cheapest, _, _): cheapest.price.amount
+        case .placeholder: nil
+        }
+    }
+
     /// «Ballenoil, 1,859 euros, barata.» / «6 gasolineras, desde 1,879 euros» / «Precio cargando».
     func accessibilityText(format: DisplayFormat) -> String {
         switch self {

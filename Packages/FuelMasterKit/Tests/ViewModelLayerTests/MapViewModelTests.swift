@@ -213,6 +213,14 @@ struct MapViewModelTests {
         #expect((move?.viewport.latitudeDelta ?? 0) < 0.06)
     }
 
+    @Test func focusMovesCloseToTheStation() {
+        let harness = MapHarness(cached: stations)
+        harness.viewModel.focus(on: Fixtures.sol)
+        let move = harness.viewModel.cameraMove
+        #expect(move?.viewport.center == Fixtures.sol)
+        #expect(move?.viewport.latitudeDelta == MapViewModel.focusSpan)
+    }
+
     @Test func levelFilterHidesOtherPins() async {
         let harness = MapHarness(cached: stations)
         let task = Task { await harness.viewModel.start() }

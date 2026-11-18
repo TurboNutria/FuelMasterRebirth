@@ -237,7 +237,8 @@ struct PanelTabSwitcher: View {
                 }
             }
             .padding(6)
-            .glassEffect(.regular, in: .capsule)
+            // Responds to touch like the system tab bar it stands in for.
+            .glassEffect(.regular.interactive(), in: .capsule)
         }
     }
 }

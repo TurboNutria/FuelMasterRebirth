@@ -34,6 +34,12 @@ public enum AppTab: String, CaseIterable, Sendable {
     }
 }
 
+/// What opened a station's detail: a pin on the map, or a row in Gasolineras, Favoritos or Buscar
+/// (widget links count as a list).
+public enum DetailOrigin: Sendable {
+    case map, list
+}
+
 /// Navigation and selection only (Bear note 02, "Review against 06"). Screen state lives in the
 /// view models, which the root creates once so they survive layout changes.
 @MainActor @Observable
@@ -76,8 +82,29 @@ public final class AppRouter {
         isDetailPresented && layoutMode != .tabs
     }
 
-    public func select(_ station: StationID?) {
+    public func select(_ station: StationID?, from origin: DetailOrigin = .list) {
+        if station != nil {
+            detailOrigin = origin
+            mapFocusID = nil
+        }
         selectedStationID = station
+    }
+
+    /// Where the open detail came from. Only a detail opened from a list offers "Ver en el mapa".
+    public private(set) var detailOrigin: DetailOrigin = .list
+    /// The station "Ver en el mapa" pointed at: its pin stays large after the detail closes, until
+    /// another station is selected.
+    public private(set) var mapFocusID: StationID?
+
+    /// The station whose pin is drawn large.
+    public var highlightedStationID: StationID? { selectedStationID ?? mapFocusID }
+
+    /// "Ver en el mapa": brings the map forward with the station marked. A detail beside the map
+    /// (the inspector) stays open; a pushed detail or a sheet would cover it, so they close.
+    public func showOnMap(_ station: StationID, keepsDetail: Bool) {
+        if !keepsDetail { selectedStationID = nil }
+        mapFocusID = station
+        if layoutMode.hasMapTab { selectedTab = .map }
     }
 
     /// A widget tap (`fuelmaster://station/<id>`). In tabs the detail pushes onto Gasolineras
@@ -86,7 +113,7 @@ public final class AppRouter {
     public func open(_ url: URL) -> Bool {
         guard let station = StationLink.station(from: url) else { return false }
         if layoutMode == .tabs, ![.list, .favorites, .search].contains(selectedTab) { selectedTab = .list }
-        selectedStationID = station
+        select(station, from: .list)
         return true
     }
 

@@ -180,6 +180,9 @@ struct SearchResultsCard: View {
                 .stationRowActions(row.summary.station, isFavorite: row.summary.isFavorite) {
                     onToggleFavorite(row.summary)
                 }
+                .stationContextMenu(row.summary, hours: row.hours, isFavorite: row.summary.isFavorite,
+                                    onToggleFavorite: { onToggleFavorite(row.summary) },
+                                    onOpen: { onSelect(row.id) })
                 if row.id != content.rows.last?.id {
                     RowSeparator()
                 }
