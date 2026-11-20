@@ -1,9 +1,9 @@
 import DataLayer
 import DomainLayer
 import SwiftUI
-import ViewLayer
 import ViewModelLayer
 import WidgetKit
+import WidgetViewLayer
 
 @main
 struct FuelMasterWidgets: WidgetBundle {

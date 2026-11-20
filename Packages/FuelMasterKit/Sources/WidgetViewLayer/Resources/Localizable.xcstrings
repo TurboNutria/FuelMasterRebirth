@@ -1,0 +1,83 @@
+{
+  "sourceLanguage" : "es",
+  "strings" : {
+    "---" : {
+
+    },
+    "%@, %@, %@" : {
+      "comment" : "Row: product, price, level",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@, %3$@"
+          }
+        }
+      }
+    },
+    "↑ Cara" : {
+      "comment" : "Widget level tag in tinted and clear modes",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "↑ Expensive"
+          }
+        }
+      }
+    },
+    "↓ Barata" : {
+      "comment" : "Widget level tag in tinted and clear modes",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "↓ Cheap"
+          }
+        }
+      }
+    },
+    "Aún no tienes favoritas" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No favourites yet"
+          }
+        }
+      }
+    },
+    "Favoritos" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favourites"
+          }
+        }
+      }
+    },
+    "Más barata cerca" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheapest nearby"
+          }
+        }
+      }
+    },
+    "Sin precios" : {
+      "comment" : "Widget: nothing cached yet for the area",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No prices"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

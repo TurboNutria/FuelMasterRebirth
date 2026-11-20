@@ -118,7 +118,7 @@ struct SettingsAndOnboardingTests {
         let viewModel = StationListViewModel(
             observeNearby: ObserveNearbyStations(cache: FakeCache(), favorites: FakeFavorites()),
             refreshPrices: RefreshPrices(remote: FakeRemote(), cache: FakeCache()),
-            resolveProvinces: ResolveProvinces(provinces: FakeProvinces()),
+            resolveArea: ResolveArea(provinces: FakeProvinces()),
             observeConnectivity: ObserveConnectivity(connectivity: FakeConnectivity()),
             observeSettings: ObserveSettings(settings: FakeSettings()), updateSettings: UpdateSettings(settings: FakeSettings()),
             locateUser: LocateUser(location: location, firstFixTimeout: .milliseconds(50)),

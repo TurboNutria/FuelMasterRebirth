@@ -11,9 +11,11 @@ private actor MemorySettings: SettingsRepository {
     private(set) var writes = 0
     init(_ settings: Settings = .default) { self.settings = settings }
     func current() async -> Settings { settings }
-    func update(_ settings: Settings) async {
-        self.settings = settings
+    @discardableResult
+    func update(_ change: @Sendable (inout Settings) -> Void) async -> Settings {
+        change(&settings)
         writes += 1
+        return settings
     }
     func changes() async -> AsyncStream<Settings> { AsyncStream { $0.finish() } }
 }
@@ -162,5 +164,47 @@ struct WidgetTests {
             refreshPrices: RefreshPrices(remote: FakeRemote(), cache: cache)
         )
         #expect(await refresh.provinces() == [madrid])
+    }
+}
+
+@Suite("Area to show")
+struct ResolveAreaTests {
+    let resolve = ResolveArea(provinces: TwoProvinces())
+
+    @Test("Without a position: the default province, then the last viewed one, then Madrid")
+    func provinceFallsBackInOrder() {
+        var settings = Settings.default
+        #expect(ResolveArea.province(for: settings) == ResolveArea.fallbackProvince)
+        settings.lastViewedProvinceID = toledo
+        #expect(ResolveArea.province(for: settings) == toledo)
+        settings.defaultProvinceID = madrid
+        #expect(ResolveArea.province(for: settings) == madrid)
+    }
+
+    @Test("A position gives the list radius around it")
+    func aroundAPosition() async {
+        let area = await resolve(around: sol)
+        #expect(area.area == .radius(center: sol, meters: ResolveArea.radius))
+        #expect(area.origin == sol)
+        #expect(area.provinces == [madrid])
+        #expect(area.provinceName == nil)
+    }
+
+    @Test("A province gives its bounds and name; an unknown one gives nothing")
+    func wholeProvince() async {
+        let area = await resolve(province: madrid)
+        #expect(area?.area == .bounds(TwoProvinces.madridProvince.bounds))
+        #expect(area?.provinceName == "Madrid")
+        #expect(area?.origin == nil)
+        #expect(await resolve(province: ProvinceID("99")) == nil)
+    }
+
+    @Test("From the settings: the last position wins over the province")
+    func fromSettings() async {
+        var settings = Settings.default
+        settings.defaultProvinceID = madrid
+        #expect(await resolve(settings)?.origin == nil)
+        settings.lastLocation = sol
+        #expect(await resolve(settings)?.origin == sol)
     }
 }

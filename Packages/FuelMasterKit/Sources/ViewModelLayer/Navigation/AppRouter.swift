@@ -126,9 +126,19 @@ public final class AppRouter {
         if !mode.hasMapTab, selectedTab == .map {
             // The map is always on screen in the larger layouts, so its tab gives way to the list.
             selectedTab = .list
-        } else if mode.hasMapTab, selectedStationID != nil, selectedTab != .list, selectedTab != .favorites {
-            // Back to tabs with a station open: Gasolineras pushes its detail (note 02).
-            selectedTab = .list
+            mapTabGaveWay = true
+        } else if mode.hasMapTab {
+            if selectedStationID != nil, selectedTab != .list, selectedTab != .favorites {
+                // Back to tabs with a station open: Gasolineras pushes its detail (note 02).
+                selectedTab = .list
+            } else if mapTabGaveWay, selectedStationID == nil, selectedTab == .list {
+                // Turned back without choosing another tab: the map stays in front (QA 2026-11-19).
+                selectedTab = .map
+            }
+            mapTabGaveWay = false
         }
     }
+
+    /// The Map tab was selected when a larger layout replaced it with the list.
+    private var mapTabGaveWay = false
 }

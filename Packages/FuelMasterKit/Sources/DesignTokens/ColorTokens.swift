@@ -2,6 +2,7 @@ import DomainLayer
 import SwiftUI
 
 /// Colour tokens from the design canvas (Fundamentos and Apariencia). Light / dark pairs.
+/// Shared by the iPhone views (ViewLayer) and the watch views (WatchViewLayer).
 /// Dark mode is one neutral graphite ramp (not black, not navy): background, then surface and
 /// cell a step lighter each, with hairlines a little above the background.
 public enum ColorTokens {
@@ -82,7 +83,7 @@ public struct PriceLevelColors: Sendable {
 }
 
 extension Color {
-    init(hex: UInt32) {
+    public init(hex: UInt32) {
         self.init(.sRGB, red: Double((hex >> 16) & 0xFF) / 255, green: Double((hex >> 8) & 0xFF) / 255,
                   blue: Double(hex & 0xFF) / 255, opacity: 1)
     }
@@ -93,7 +94,10 @@ extension Color {
 
     /// Light / dark pairs, with their Increase Contrast versions.
     init(light: UInt32, dark: UInt32, highLight: UInt32, highDark: UInt32) {
-        #if canImport(UIKit)
+        #if os(watchOS)
+        // The watch is always dark and has no trait-based colours.
+        self.init(hex: dark)
+        #elseif canImport(UIKit)
         self.init(uiColor: UIColor { traits in
             let isDark = traits.userInterfaceStyle == .dark
             let isHigh = traits.accessibilityContrast == .high
@@ -106,7 +110,7 @@ extension Color {
         #endif
     }
 
-    init(_ rgb: CustomColor) {
+    public init(_ rgb: CustomColor) {
         self.init(.sRGB, red: rgb.red, green: rgb.green, blue: rgb.blue, opacity: 1)
     }
 }

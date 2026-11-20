@@ -49,10 +49,6 @@ public struct StationListContent: Sendable, Equatable {
 /// filtered, with first load, updating, offline and empty states.
 @MainActor @Observable
 public final class StationListViewModel {
-    public static let radius: Double = 3000
-    /// Used when there's no location and no default province yet (onboarding sets one in U6).
-    public static let fallbackProvince = ProvinceID("28")
-
     public private(set) var product: Product = .diesel
     public var sort: StationSort = .cheapest {
         didSet { if sort != oldValue { observe() } }
@@ -81,7 +77,7 @@ public final class StationListViewModel {
     private let toggleFavoriteUseCase: ToggleFavorite
     private let observeNearby: ObserveNearbyStations
     private let refreshPrices: RefreshPrices
-    private let resolveProvinces: ResolveProvinces
+    private let resolveArea: ResolveArea
     private let observeConnectivity: ObserveConnectivity
     private let observeSettings: ObserveSettings
     private let updateSettings: UpdateSettings
@@ -91,14 +87,14 @@ public final class StationListViewModel {
     private let now: @Sendable () -> Date
 
     public init(observeNearby: ObserveNearbyStations, refreshPrices: RefreshPrices,
-                resolveProvinces: ResolveProvinces, observeConnectivity: ObserveConnectivity,
+                resolveArea: ResolveArea, observeConnectivity: ObserveConnectivity,
                 observeSettings: ObserveSettings, updateSettings: UpdateSettings, locateUser: LocateUser,
                 toggleFavorite: ToggleFavorite, rememberArea: RememberArea? = nil,
                 format: DisplayFormat = DisplayFormat(), now: @escaping @Sendable () -> Date = { .now }) {
         self.toggleFavoriteUseCase = toggleFavorite
         self.observeNearby = observeNearby
         self.refreshPrices = refreshPrices
-        self.resolveProvinces = resolveProvinces
+        self.resolveArea = resolveArea
         self.observeConnectivity = observeConnectivity
         self.observeSettings = observeSettings
         self.updateSettings = updateSettings
@@ -144,7 +140,7 @@ public final class StationListViewModel {
         let run = startCount
         let settings = await observeSettings.current()
         product = settings.product
-        await resolveArea(settings: settings)
+        await findArea(settings: settings)
         observe()
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.refresh() }
@@ -185,29 +181,26 @@ public final class StationListViewModel {
 
     // MARK: Loading
 
-    private func resolveArea(settings: Settings) async {
+    private func findArea(settings: Settings) async {
         if await locateUser.status() == .authorized, let fix = await locateUser.firstFix() {
             await use(location: fix)
             return
         }
-        let id = settings.defaultProvinceID ?? settings.lastViewedProvinceID ?? Self.fallbackProvince
+        let id = ResolveArea.province(for: settings)
+        let resolved = await resolveArea(province: id)
         origin = nil
-        provinces = [id]
-        if let province = await resolveProvinces.province(id) {
-            area = .bounds(province.bounds)
-            scope = .province(name: province.name)
-        } else {
-            area = nil
-            scope = nil
-        }
+        provinces = resolved?.provinces ?? [id]
+        area = resolved?.area
+        scope = resolved?.provinceName.map { .province(name: $0) }
     }
 
     private func use(location: Coordinate) async {
         await rememberArea?(location)
-        origin = location
-        area = .radius(center: location, meters: Self.radius)
-        scope = .nearby(radius: Self.radius)
-        provinces = await resolveProvinces(around: location)
+        let resolved = await resolveArea(around: location)
+        origin = resolved.origin
+        area = resolved.area
+        scope = .nearby(radius: ResolveArea.radius)
+        provinces = resolved.provinces
     }
 
     private var request: NearbyRequest? {

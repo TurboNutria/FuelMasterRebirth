@@ -2,26 +2,6 @@ import DomainLayer
 import Foundation
 import Observation
 
-/// The 7-day chart, ready to draw: one line for the station, a dashed one for the area average.
-public struct HistoryChart: Sendable, Equatable {
-    public let history: PriceHistory
-    /// Padded so a flat line doesn't sit on the chart's edge.
-    public let range: ClosedRange<Double>
-    public let isLoading: Bool
-    /// The missing days couldn't be fetched (offline or the ministry is down).
-    public let isIncomplete: Bool
-
-    public var minimum: Decimal? { history.minimum }
-    public var maximum: Decimal? { history.maximum }
-    public var change: PriceChange? { history.change }
-    public var hasStationPrices: Bool { history.points.contains { $0.amount != nil } }
-    public var areaRange: (minimum: Decimal, maximum: Decimal)? {
-        let amounts = history.areaAverage.compactMap(\.amount)
-        guard let minimum = amounts.min(), let maximum = amounts.max() else { return nil }
-        return (minimum, maximum)
-    }
-}
-
 public struct StationDetailContent: Sendable, Equatable {
     public let detail: StationDetail
     public let hours: HoursSummary
@@ -100,13 +80,7 @@ public final class StationDetailViewModel {
     }
 
     private var chart: HistoryChart? {
-        guard let history else { return nil }
-        let amounts = (history.points + history.areaAverage).compactMap(\.amount).map { NSDecimalNumber(decimal: $0).doubleValue }
-        guard let low = amounts.min(), let high = amounts.max() else { return nil }
-        // At least 6 cents tall, the size of the price-level band, so small moves don't look dramatic.
-        let padding = max(0.01, (0.06 - (high - low)) / 2)
-        return HistoryChart(history: history, range: (low - padding)...(high + padding),
-                            isLoading: isLoadingHistory, isIncomplete: historyFailed)
+        history.flatMap { HistoryChart(history: $0, isLoading: isLoadingHistory, isIncomplete: historyFailed) }
     }
 
     /// Apple Maps link for Compartir.

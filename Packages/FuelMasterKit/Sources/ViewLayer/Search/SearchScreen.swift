@@ -1,3 +1,4 @@
+import DesignTokens
 import DomainLayer
 import SwiftUI
 import ViewModelLayer
@@ -50,7 +51,7 @@ public struct SearchScreen: View {
                     if let summary { Text(summary).font(.footnote).foregroundStyle(ColorTokens.textSecondary) }
                     results
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Metrics.screenMargin)
                 .padding(.bottom, 24)
             }
             .scrollDismissesKeyboard(.immediately)
@@ -71,7 +72,7 @@ public struct SearchScreen: View {
             EmptyStateView(systemImage: "magnifyingglass",
                            title: String(localized: "Busca una gasolinera", bundle: .module),
                            message: String(localized: "Por marca, localidad o código postal.", bundle: .module))
-                .padding(.top, 60)
+                .padding(.top, Metrics.emptyStateTop)
         } else {
             switch viewModel.state {
             case .firstLoad:
@@ -86,12 +87,12 @@ public struct SearchScreen: View {
                 EmptyStateView(systemImage: "magnifyingglass",
                                title: String(localized: "Sin resultados para «\(text)»", bundle: .module),
                                message: String(localized: "Prueba con una marca, una localidad o un código postal distinto.", bundle: .module))
-                    .padding(.top, 60)
+                    .padding(.top, Metrics.emptyStateTop)
             case .empty:
                 EmptyView()
             case .failed(let error):
                 FailedListView(error: error) { viewModel.retry() }
-                    .padding(.top, 60)
+                    .padding(.top, Metrics.emptyStateTop)
             }
         }
     }

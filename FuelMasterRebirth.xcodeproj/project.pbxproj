@@ -15,8 +15,14 @@
 		0000000000000000000C0011 /* DomainLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0011 /* DomainLayer */; };
 		0000000000000000000C0012 /* DataLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0012 /* DataLayer */; };
 		0000000000000000000C0013 /* ViewModelLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0013 /* ViewModelLayer */; };
-		0000000000000000000C0014 /* ViewLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0014 /* ViewLayer */; };
+		0000000000000000000C0014 /* WidgetViewLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0014 /* WidgetViewLayer */; };
 		0000000000000000000C0020 /* FuelMasterWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 000000000000000000000121 /* FuelMasterWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		0000000000000000000C0030 /* NetworkLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0030 /* NetworkLayer */; };
+		0000000000000000000C0031 /* DomainLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0031 /* DomainLayer */; };
+		0000000000000000000C0032 /* DataLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0032 /* DataLayer */; };
+		0000000000000000000C0033 /* ViewModelLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0033 /* ViewModelLayer */; };
+		0000000000000000000C0034 /* WatchViewLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 0000000000000000000B0034 /* WatchViewLayer */; };
+		0000000000000000000C0040 /* FuelMasterWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 000000000000000000000123 /* FuelMasterWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,6 +40,13 @@
 			remoteGlobalIDString = 000000000000000100000000;
 			remoteInfo = FuelMasterRebirth;
 		};
+		000000000000000000000302 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000400000000;
+			remoteInfo = FuelMasterWatch;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -46,12 +59,22 @@
 			);
 			name = "Embed Foundation Extensions";
 		};
+		000000000000000160000000 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolder = Product;
+			files = (
+				0000000000000000000C0040 /* FuelMasterWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* FuelMasterRebirth.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FuelMasterRebirth.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		000000000000000000000121 /* FuelMasterWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FuelMasterWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		000000000000000000000122 /* FuelMasterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FuelMasterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000000000000000123 /* FuelMasterWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FuelMasterWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -68,6 +91,11 @@
 		000000000000000000000012 /* UITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = UITests;
+			sourceTree = "<group>";
+		};
+		000000000000000000000013 /* WatchApp */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = WatchApp;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -89,12 +117,22 @@
 				0000000000000000000C0011 /* DomainLayer in Frameworks */,
 				0000000000000000000C0012 /* DataLayer in Frameworks */,
 				0000000000000000000C0013 /* ViewModelLayer in Frameworks */,
-				0000000000000000000C0014 /* ViewLayer in Frameworks */,
+				0000000000000000000C0014 /* WidgetViewLayer in Frameworks */,
 			);
 		};
 		000000000000000330000000 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+			);
+		};
+		000000000000000430000000 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				0000000000000000000C0030 /* NetworkLayer in Frameworks */,
+				0000000000000000000C0031 /* DomainLayer in Frameworks */,
+				0000000000000000000C0032 /* DataLayer in Frameworks */,
+				0000000000000000000C0033 /* ViewModelLayer in Frameworks */,
+				0000000000000000000C0034 /* WatchViewLayer in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -106,6 +144,7 @@
 				000000000000000000000010 /* App */,
 				000000000000000000000011 /* Widgets */,
 				000000000000000000000012 /* UITests */,
+				000000000000000000000013 /* WatchApp */,
 				000000000000000000000020 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -116,6 +155,7 @@
 				000000000000000000000120 /* FuelMasterRebirth.app */,
 				000000000000000000000121 /* FuelMasterWidgets.appex */,
 				000000000000000000000122 /* FuelMasterUITests.xctest */,
+				000000000000000000000123 /* FuelMasterWatch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -131,11 +171,13 @@
 				000000000000000130000000 /* Frameworks */,
 				000000000000000140000000 /* Resources */,
 				000000000000000150000000 /* Embed Foundation Extensions */,
+				000000000000000160000000 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				000000000000000000000310 /* PBXTargetDependency */,
+				000000000000000000000312 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				000000000000000000000010 /* App */,
@@ -170,7 +212,7 @@
 				0000000000000000000B0011 /* DomainLayer */,
 				0000000000000000000B0012 /* DataLayer */,
 				0000000000000000000B0013 /* ViewModelLayer */,
-				0000000000000000000B0014 /* ViewLayer */,
+				0000000000000000000B0014 /* WidgetViewLayer */,
 			);
 			productName = FuelMasterWidgets;
 			productReference = 000000000000000000000121 /* FuelMasterWidgets.appex */;
@@ -197,6 +239,31 @@
 			productReference = 000000000000000000000122 /* FuelMasterUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		000000000000000400000000 /* FuelMasterWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000410000000 /* Build configuration list for PBXNativeTarget "FuelMasterWatch" */;
+			buildPhases = (
+				000000000000000420000000 /* Sources */,
+				000000000000000430000000 /* Frameworks */,
+				000000000000000440000000 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				000000000000000000000013 /* WatchApp */,
+			);
+			name = FuelMasterWatch;
+			packageProductDependencies = (
+				0000000000000000000B0030 /* NetworkLayer */,
+				0000000000000000000B0031 /* DomainLayer */,
+				0000000000000000000B0032 /* DataLayer */,
+				0000000000000000000B0033 /* ViewModelLayer */,
+				0000000000000000000B0034 /* WatchViewLayer */,
+			);
+			productName = FuelMasterWatch;
+			productReference = 000000000000000000000123 /* FuelMasterWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -216,6 +283,9 @@
 					000000000000000300000000 = {
 						CreatedOnToolsVersion = 27.1;
 						TestTargetID = 000000000000000100000000;
+					};
+					000000000000000400000000 = {
+						CreatedOnToolsVersion = 27.1;
 					};
 				};
 			};
@@ -240,6 +310,7 @@
 				000000000000000100000000 /* FuelMasterRebirth */,
 				000000000000000200000000 /* FuelMasterWidgets */,
 				000000000000000300000000 /* FuelMasterUITests */,
+				000000000000000400000000 /* FuelMasterWatch */,
 			);
 		};
 /* End PBXProject section */
@@ -256,6 +327,11 @@
 			);
 		};
 		000000000000000340000000 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		000000000000000440000000 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -278,6 +354,11 @@
 			files = (
 			);
 		};
+		000000000000000420000000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -290,6 +371,11 @@
 			isa = PBXTargetDependency;
 			target = 000000000000000100000000 /* FuelMasterRebirth */;
 			targetProxy = 000000000000000000000301 /* PBXContainerItemProxy */;
+		};
+		000000000000000000000312 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 000000000000000400000000 /* FuelMasterWatch */;
+			targetProxy = 000000000000000000000302 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -610,6 +696,78 @@
 			};
 			name = Release;
 		};
+		000000000000000411000000 /* Debug configuration for PBXNativeTarget "FuelMasterWatch" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6UQAA233N7;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Watch-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = FuelMaster;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Para mostrarte las gasolineras de tu zona y a qué distancia están. Tu ubicación no sale de tu reloj.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.turbonutria.fuelmasterrebirth;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.turbonutria.fuelmasterrebirth.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		000000000000000412000000 /* Release configuration for PBXNativeTarget "FuelMasterWatch" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6UQAA233N7;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Watch-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = FuelMaster;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Para mostrarte las gasolineras de tu zona y a qué distancia están. Tu ubicación no sale de tu reloj.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.turbonutria.fuelmasterrebirth;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.turbonutria.fuelmasterrebirth.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -642,6 +800,14 @@
 			buildConfigurations = (
 				000000000000000311000000 /* Debug configuration for PBXNativeTarget "FuelMasterUITests" */,
 				000000000000000312000000 /* Release configuration for PBXNativeTarget "FuelMasterUITests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		000000000000000410000000 /* Build configuration list for PBXNativeTarget "FuelMasterWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000411000000 /* Debug configuration for PBXNativeTarget "FuelMasterWatch" */,
+				000000000000000412000000 /* Release configuration for PBXNativeTarget "FuelMasterWatch" */,
 			);
 			defaultConfigurationName = Release;
 		};
@@ -695,10 +861,35 @@
 			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
 			productName = ViewModelLayer;
 		};
-		0000000000000000000B0014 /* ViewLayer */ = {
+		0000000000000000000B0014 /* WidgetViewLayer */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
-			productName = ViewLayer;
+			productName = WidgetViewLayer;
+		};
+		0000000000000000000B0030 /* NetworkLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
+			productName = NetworkLayer;
+		};
+		0000000000000000000B0031 /* DomainLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
+			productName = DomainLayer;
+		};
+		0000000000000000000B0032 /* DataLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
+			productName = DataLayer;
+		};
+		0000000000000000000B0033 /* ViewModelLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
+			productName = ViewModelLayer;
+		};
+		0000000000000000000B0034 /* WatchViewLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0000000000000000000A0000 /* XCLocalSwiftPackageReference "Packages/FuelMasterKit" */;
+			productName = WatchViewLayer;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

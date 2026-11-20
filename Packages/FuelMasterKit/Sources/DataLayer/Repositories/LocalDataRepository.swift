@@ -1,6 +1,7 @@
 import DomainLayer
 import Foundation
 import SwiftData
+import Synchronization
 
 /// Everything stored or bundled on the device: the price cache and history (SwiftData),
 /// province outlines and municipalities (bundled JSON), and per-device settings (App Group defaults).
@@ -10,6 +11,8 @@ public final class LocalDataRepository: StationCacheRepository, ProvinceReposito
     private let defaults: UserDefaultsBox
     private let cacheChanges = Broadcaster<Void>()
     private let settingsChanges = Broadcaster<DomainLayer.Settings>()
+    /// Serialises settings writes, so two changes made at once can't undo each other.
+    private let settingsLock = Mutex(())
 
     static let settingsKey = "settings.v1"
 
@@ -31,7 +34,7 @@ public final class LocalDataRepository: StationCacheRepository, ProvinceReposito
 
     public func save(_ snapshot: ProvinceSnapshot, fetchedAt: Date) async throws {
         try await store.save(snapshot, fetchedAt: fetchedAt)
-        await cacheChanges.send(())
+        cacheChanges.send(())
     }
 
     public func freshness(of province: ProvinceID) async throws -> Freshness? {
@@ -52,7 +55,7 @@ public final class LocalDataRepository: StationCacheRepository, ProvinceReposito
 
     public func save(_ history: HistorySnapshot) async throws {
         try await store.save(history)
-        await cacheChanges.send(())
+        cacheChanges.send(())
     }
 
     public func deleteHistory(before day: Date) async throws {
@@ -60,7 +63,7 @@ public final class LocalDataRepository: StationCacheRepository, ProvinceReposito
     }
 
     public func changes() async -> AsyncStream<Void> {
-        await cacheChanges.stream()
+        cacheChanges.stream()
     }
 
     // MARK: - ProvinceRepository
@@ -80,25 +83,33 @@ public final class LocalDataRepository: StationCacheRepository, ProvinceReposito
     // MARK: - SettingsRepository
 
     public func current() async -> DomainLayer.Settings {
+        settingsLock.withLock { _ in storedSettings() }
+    }
+
+    /// Reads, changes, saves and publishes under one lock, so a change made at the same time by
+    /// another caller is never overwritten and observers see the changes in order.
+    @discardableResult
+    public func update(_ change: @Sendable (inout DomainLayer.Settings) -> Void) async -> DomainLayer.Settings {
+        settingsLock.withLock { _ in
+            let current = storedSettings()
+            var next = current
+            change(&next)
+            guard next != current else { return current }
+            if let data = try? JSONEncoder().encode(next) {
+                defaults.value.set(data, forKey: Self.settingsKey)
+            }
+            settingsChanges.send(next)
+            return next
+        }
+    }
+
+    public func changes() async -> AsyncStream<DomainLayer.Settings> {
+        settingsChanges.stream()
+    }
+
+    private func storedSettings() -> DomainLayer.Settings {
         guard let data = defaults.value.data(forKey: Self.settingsKey),
               let settings = try? JSONDecoder().decode(DomainLayer.Settings.self, from: data) else { return .default }
         return settings
     }
-
-    public func update(_ settings: DomainLayer.Settings) async {
-        if let data = try? JSONEncoder().encode(settings) {
-            defaults.value.set(data, forKey: Self.settingsKey)
-        }
-        await settingsChanges.send(settings)
-    }
-
-    public func changes() async -> AsyncStream<DomainLayer.Settings> {
-        await settingsChanges.stream()
-    }
-}
-
-/// `UserDefaults` is thread-safe but not marked `Sendable`.
-private struct UserDefaultsBox: @unchecked Sendable {
-    let value: UserDefaults
-    init(_ value: UserDefaults) { self.value = value }
 }

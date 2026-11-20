@@ -1,3 +1,4 @@
+import DesignTokens
 import DomainLayer
 import MapKit
 import SwiftUI
@@ -10,7 +11,6 @@ public struct MapScreen: View {
     @Bindable var viewModel: MapViewModel
 
     @Environment(AppRouter.self) private var router
-    @Environment(\.displayFormat) private var format
     @Environment(\.freeTopInset) private var freeTopInset
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     public init(viewModel: MapViewModel) {
@@ -22,11 +22,13 @@ public struct MapScreen: View {
         Color.clear
             .background {
                 PinMap(pins: pins, highlightedID: router.highlightedStationID, cameraMove: viewModel.cameraMove,
+                       openingCamera: { [viewModel] in viewModel.openingCamera },
                        showsUserLocation: viewModel.showsUserLocation,
-                       onViewportChange: { viewport, width, distance in
-                           viewModel.viewportChanged(viewport, width: width, distance: distance)
+                       onViewportChange: { viewport, width, zoom in
+                           viewModel.viewportChanged(viewport, width: width, zoom: zoom)
                        },
-                       onTap: tap)
+                       onTap: tap,
+                       onCameraMoveShown: { [viewModel] move in viewModel.cameraMoveShown(move) })
                     .ignoresSafeArea()
             }
             // The controls over the map stop growing at the largest standard size, as in Maps, so
@@ -121,16 +123,11 @@ public struct MapScreen: View {
         }
     }
 
-    private var bottomStack: some View {
-        VStack(spacing: 10) {
-            if case .updating = viewModel.state { UpdatingPill() }
-            if viewModel.isOfflinePillVisible {
-                OfflinePill(age: viewModel.state.content?.pricesDate.map { format.relativeTimeInSentence($0, now: .now) }) {
-                    viewModel.dismissOfflinePill()
-                }
-            }
-        }
-        .padding(.bottom, 12)
+    private var bottomStack: StatusPillStack {
+        let isUpdating = if case .updating = viewModel.state { true } else { false }
+        return StatusPillStack(isUpdating: isUpdating, showsOffline: viewModel.isOfflinePillVisible,
+                               pricesDate: viewModel.state.content?.pricesDate,
+                               onDismissOffline: viewModel.dismissOfflinePill)
     }
 }
 
@@ -142,12 +139,7 @@ struct MapFuelMenu: View {
 
     var body: some View {
         Menu {
-            // A picker, so the system draws the tick in its own column and the names stay aligned.
-            Picker(selection: Binding(get: { product }, set: onSelect)) {
-                ForEach(products) { Text($0.displayName).tag($0) }
-            } label: {
-                Text("Combustible", bundle: .module)
-            }
+            FuelPicker(product: product, products: products, onSelect: onSelect)
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: "fuelpump")

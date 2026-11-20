@@ -69,7 +69,7 @@ public struct ObserveFavorites: Sendable {
     private let summarize = SummarizeArea()
     private let fuelCost = CalculateFuelCost()
     private let openingHours: EvaluateOpeningHours
-    private let calendar: Calendar
+    private let sinceYesterday: ChangeSinceYesterday
     private let now: @Sendable () -> Date
 
     public init(favorites: any FavoriteStationsRepository, cache: any StationCacheRepository,
@@ -79,9 +79,7 @@ public struct ObserveFavorites: Sendable {
         self.favorites = favorites
         self.cache = cache
         self.openingHours = openingHours
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = timeZone
-        self.calendar = calendar
+        sinceYesterday = ChangeSinceYesterday(cache: cache, timeZone: timeZone)
         self.now = now
     }
 
@@ -91,7 +89,7 @@ public struct ObserveFavorites: Sendable {
         let stations = try await cache.stations(in: provinces)
         let byID = Dictionary(stations.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         let moment = now()
-        let yesterday = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: moment))!
+        let yesterday = sinceYesterday.yesterday(at: moment)
 
         var averages: [ProvinceID: Decimal] = [:]
         var freshness: Freshness?
@@ -122,9 +120,7 @@ public struct ObserveFavorites: Sendable {
                 distance: request.origin.map { station.coordinate.distance(to: $0) },
                 openingStatus: openingHours(station.hours, at: moment), isFavorite: true
             )
-            let previous = try await cache.history(station: station.id, product: request.product, since: yesterday)
-                .first { $0.day == yesterday }?.amount
-            let change = previous.map { PriceChange(difference: price.amount - $0, comparedDay: yesterday) }
+            let change = try await sinceYesterday(price, station: station.id, yesterday: yesterday)
             items.append(FavoriteSummary(entry: entry, station: station, summary: summary, change: change))
         }
 

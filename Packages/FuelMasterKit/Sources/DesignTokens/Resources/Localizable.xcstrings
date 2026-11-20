@@ -1,0 +1,246 @@
+{
+  "sourceLanguage" : "es",
+  "strings" : {
+    "---" : {
+
+    },
+    "%@ bajo la media" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ below average"
+          }
+        }
+      }
+    },
+    "%@ sobre la media" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ above average"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "comment" : "Price and its level: 1,859 €, barata",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "€/kg" : {
+      "comment" : "After a price per kilogram",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "€/kg"
+          }
+        }
+      }
+    },
+    "€/l" : {
+      "comment" : "After a price per litre",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "€/l"
+          }
+        }
+      }
+    },
+    "AdBlue" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AdBlue"
+          }
+        }
+      }
+    },
+    "barata" : {
+      "comment" : "Price level, read inside a sentence",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cheap"
+          }
+        }
+      }
+    },
+    "cara" : {
+      "comment" : "Price level, read inside a sentence",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "expensive"
+          }
+        }
+      }
+    },
+    "Diésel" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diesel"
+          }
+        }
+      }
+    },
+    "Diésel Premium" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premium diesel"
+          }
+        }
+      }
+    },
+    "Diésel renovable (HVO)" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renewable diesel (HVO)"
+          }
+        }
+      }
+    },
+    "En la media" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At the average"
+          }
+        }
+      }
+    },
+    "Gasolina 95" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petrol 95"
+          }
+        }
+      }
+    },
+    "Gasolina 95 Premium" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premium petrol 95"
+          }
+        }
+      }
+    },
+    "Gasolina 98" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petrol 98"
+          }
+        }
+      }
+    },
+    "GLP" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LPG"
+          }
+        }
+      }
+    },
+    "GNC" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CNG"
+          }
+        }
+      }
+    },
+    "GNL" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LNG"
+          }
+        }
+      }
+    },
+    "Ha bajado %@ desde ayer" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Down %@ since yesterday"
+          }
+        }
+      }
+    },
+    "Ha subido %@ desde ayer" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up %@ since yesterday"
+          }
+        }
+      }
+    },
+    "Igual que ayer" : {
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Same as yesterday"
+          }
+        }
+      }
+    },
+    "media" : {
+      "comment" : "Price level, read inside a sentence",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "average"
+          }
+        }
+      }
+    },
+    "Precio cargando" : {
+      "comment" : "Grey placeholder chip on first load",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Price loading"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

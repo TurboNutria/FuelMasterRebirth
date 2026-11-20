@@ -2,18 +2,25 @@
 import PackageDescription
 
 // Layers (see Bear note 06): View → ViewModel → Domain ← Data → Network.
+// The watch app uses the same Network, Data, Domain and ViewModel layers, with its own views
+// (WatchViewLayer). The widget extension draws with WidgetViewLayer only, so it doesn't link the
+// app's screens. DesignTokens holds what every view target shares: colours, logos, the look
+// environment values, fuel and price-level names, the price chip and the change label.
 // Targets carry a "Layer" suffix so they don't clash with Apple's `Network` framework
 // or Foundation's `Data` type.
 let package = Package(
     name: "FuelMasterKit",
     defaultLocalization: "es",
-    platforms: [.iOS(.v26), .macOS(.v26)],
+    platforms: [.iOS(.v26), .macOS(.v26), .watchOS(.v26)],
     products: [
         .library(name: "NetworkLayer", targets: ["NetworkLayer"]),
         .library(name: "DomainLayer", targets: ["DomainLayer"]),
         .library(name: "DataLayer", targets: ["DataLayer"]),
         .library(name: "ViewModelLayer", targets: ["ViewModelLayer"]),
+        .library(name: "DesignTokens", targets: ["DesignTokens"]),
         .library(name: "ViewLayer", targets: ["ViewLayer"]),
+        .library(name: "WatchViewLayer", targets: ["WatchViewLayer"]),
+        .library(name: "WidgetViewLayer", targets: ["WidgetViewLayer"]),
     ],
     targets: [
         .target(name: "NetworkLayer"),
@@ -25,8 +32,23 @@ let package = Package(
         ),
         .target(name: "ViewModelLayer", dependencies: ["DomainLayer"]),
         .target(
+            name: "DesignTokens",
+            dependencies: ["DomainLayer", "ViewModelLayer"],
+            resources: [.process("Resources")]
+        ),
+        .target(
             name: "ViewLayer",
-            dependencies: ["ViewModelLayer", "DomainLayer"],
+            dependencies: ["ViewModelLayer", "DomainLayer", "DesignTokens", "WidgetViewLayer"],
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "WidgetViewLayer",
+            dependencies: ["ViewModelLayer", "DomainLayer", "DesignTokens"],
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "WatchViewLayer",
+            dependencies: ["ViewModelLayer", "DomainLayer", "DesignTokens"],
             resources: [.process("Resources")]
         ),
 

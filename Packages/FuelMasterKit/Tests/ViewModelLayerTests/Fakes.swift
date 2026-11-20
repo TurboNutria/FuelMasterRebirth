@@ -144,9 +144,11 @@ actor FakeSettings: SettingsRepository {
     init(_ settings: Settings = .default) { self.settings = settings }
 
     func current() async -> Settings { settings }
-    func update(_ settings: Settings) async {
-        self.settings = settings
+    @discardableResult
+    func update(_ change: @Sendable (inout Settings) -> Void) async -> Settings {
+        change(&settings)
         channel.send(settings)
+        return settings
     }
     func changes() async -> AsyncStream<Settings> { channel.stream }
 }
@@ -205,7 +207,7 @@ struct ListHarness {
         viewModel = StationListViewModel(
             observeNearby: ObserveNearbyStations(cache: cache, favorites: favorites, now: { now }),
             refreshPrices: RefreshPrices(remote: remote, cache: cache, now: { now }),
-            resolveProvinces: ResolveProvinces(provinces: FakeProvinces()),
+            resolveArea: ResolveArea(provinces: FakeProvinces()),
             observeConnectivity: ObserveConnectivity(connectivity: connectivity),
             observeSettings: ObserveSettings(settings: self.settings),
             updateSettings: UpdateSettings(settings: self.settings),
@@ -255,6 +257,7 @@ struct MapHarness {
             observeNearby: ObserveNearbyStations(cache: cache, favorites: FakeFavorites(), now: { now }),
             refreshPrices: RefreshPrices(remote: remote, cache: cache, now: { now }),
             resolveProvinces: ResolveProvinces(provinces: FakeProvinces()),
+            resolveArea: ResolveArea(provinces: FakeProvinces()),
             observeConnectivity: ObserveConnectivity(connectivity: connectivity),
             observeSettings: ObserveSettings(settings: settings),
             updateSettings: UpdateSettings(settings: settings),
@@ -329,7 +332,8 @@ struct FavoritesHarness {
             reorderFavorites: ReorderFavorites(favorites: favorites),
             observeICloudStatus: ObserveICloudStatus(favorites: favorites),
             refreshPrices: RefreshPrices(remote: remote, cache: cache, now: { now }),
-            backfillHistory: BackfillHistory(remote: remote, cache: cache, now: { now }),
+            refreshFavorites: RefreshFavorites(refreshPrices: RefreshPrices(remote: remote, cache: cache, now: { now }),
+                                               backfill: BackfillHistory(remote: remote, cache: cache, now: { now })),
             observeSettings: ObserveSettings(settings: settings),
             locateUser: LocateUser(location: FakeLocation(), firstFixTimeout: .milliseconds(100)),
             format: DisplayFormat(locale: Locale(identifier: "es_ES")),
@@ -363,7 +367,7 @@ struct SearchHarness {
         viewModel = SearchViewModel(
             searchStations: SearchStations(cache: cache, provinces: FakeProvinces(), favorites: favorites,
                                            refreshPrices: RefreshPrices(remote: remote, cache: cache, now: { now }), now: { now }),
-            resolveProvinces: ResolveProvinces(provinces: FakeProvinces()),
+            resolveArea: ResolveArea(provinces: FakeProvinces()),
             toggleFavorite: ToggleFavorite(favorites: favorites),
             observeSettings: ObserveSettings(settings: settings),
             locateUser: LocateUser(location: location, firstFixTimeout: .milliseconds(100)),

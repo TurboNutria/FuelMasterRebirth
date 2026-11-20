@@ -76,6 +76,28 @@ struct AppRouterTests {
         #expect(router.visibleTabs == [.list, .favorites, .search, .settings])
     }
 
+    @Test func rotatingBackReturnsToTheMapTab() {
+        let router = AppRouter(selectedTab: .map)
+        router.layoutDidChange(to: .sideBySide)
+        router.layoutDidChange(to: .tabs)
+        #expect(router.selectedTab == .map)
+    }
+
+    @Test func aTabChosenInTheLargerLayoutStays() {
+        let router = AppRouter(selectedTab: .map)
+        router.layoutDidChange(to: .sideBySide)
+        router.selectedTab = .favorites
+        router.layoutDidChange(to: .tabs)
+        #expect(router.selectedTab == .favorites)
+    }
+
+    @Test func theListTabStaysWhenItWasChosenBefore() {
+        let router = AppRouter(selectedTab: .list)
+        router.layoutDidChange(to: .sideBySide)
+        router.layoutDidChange(to: .tabs)
+        #expect(router.selectedTab == .list)
+    }
+
     @Test func selectionSurvivesUnfoldingAndFolding() {
         let router = AppRouter(selectedTab: .favorites)
         router.select(station)

@@ -11,10 +11,28 @@ public struct TentBoardRow: Sendable, Equatable, Identifiable {
     public var id: Product { product }
 }
 
+/// When a closed station opens again, ready for the board.
+public struct TentReopening: Sendable, Equatable {
+    public enum Day: Sendable, Equatable {
+        case today
+        case tomorrow
+        /// "martes".
+        case weekday(String)
+    }
+
+    public let day: Day
+    /// "7:30", following the locale's 12/24-hour setting (VoiceOver).
+    public let time: String
+    /// "06:00" in 24-hour time whatever the device setting: signs don't do am / pm.
+    public let signTime: String
+}
+
 public struct TentBoardContent: Sendable, Equatable {
     public let detail: StationDetail
     public let hours: HoursSummary
     public let rows: [TentBoardRow]
+    /// Nil while open, or when the next opening isn't known.
+    public let reopening: TentReopening?
 
     public var station: Station { detail.station }
     public var isClosed: Bool {
@@ -28,8 +46,8 @@ public struct TentBoardContent: Sendable, Equatable {
 }
 
 /// The price board for the closed iPhone Duo in landscape ("tent", canvas: Tent Price Board): one
-/// station's prices like a forecourt sign. The view picks the station (the selected one, or the
-/// cheapest open one nearby from Gasolineras); this loads its fuels and their change since
+/// station's prices like a forecourt sign. `TentBoardChoice` picks the station (the selected one,
+/// or the cheapest open one nearby from Gasolineras); this loads its fuels and their change since
 /// yesterday.
 @MainActor @Observable
 public final class TentBoardViewModel {
@@ -48,16 +66,14 @@ public final class TentBoardViewModel {
     @ObservationIgnored private var historyKey: StationID?
 
     private let getDetail: GetStationDetail
-    private let getHistory: GetPriceHistory
-    private let backfillHistory: BackfillHistory
+    private let getPriceChanges: GetPriceChanges
     private let format: DisplayFormat
     private let now: @Sendable () -> Date
 
-    public init(getDetail: GetStationDetail, getHistory: GetPriceHistory, backfillHistory: BackfillHistory,
+    public init(getDetail: GetStationDetail, getPriceChanges: GetPriceChanges,
                 format: DisplayFormat = DisplayFormat(), now: @escaping @Sendable () -> Date = { .now }) {
         self.getDetail = getDetail
-        self.getHistory = getHistory
-        self.backfillHistory = backfillHistory
+        self.getPriceChanges = getPriceChanges
         self.format = format
         self.now = now
     }
@@ -81,7 +97,7 @@ public final class TentBoardViewModel {
             rebuild(product: product)
             if let next, historyKey != id {
                 historyKey = id
-                await loadChanges(for: next.station, product: product)
+                changes = await getPriceChanges(next.station, products: Self.products(for: next.station, chosen: product))
                 rebuild(product: product)
             }
         }
@@ -98,20 +114,25 @@ public final class TentBoardViewModel {
         content = TentBoardContent(
             detail: detail,
             hours: HoursText.summary(for: detail.station.hours, status: detail.openingStatus, at: now(), format: format),
-            rows: rows
+            rows: rows,
+            reopening: {
+                guard case .closed(let opensAt?) = detail.openingStatus else { return nil }
+                return Self.reopening(at: opensAt, now: now(), format: format)
+            }()
         )
     }
 
-    /// Today against yesterday for each row. Yesterday is fetched when missing: one request per
-    /// fuel, for the station's province.
-    private func loadChanges(for station: Station, product: Product) async {
-        for fuel in Self.products(for: station, chosen: product) {
-            try? await backfillHistory(province: station.provinceID, product: fuel, recentDays: 1)
-            guard let history = try? await getHistory.cached(station: station.id, product: fuel),
-                  history.points.count >= 2,
-                  let today = history.points[history.points.count - 1].amount,
-                  let yesterday = history.points[history.points.count - 2].amount else { continue }
-            changes[fuel] = PriceChange(difference: today - yesterday, comparedDay: history.points[history.points.count - 2].day)
+    public static func reopening(at date: Date, now: Date, format: DisplayFormat) -> TentReopening {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = HoursText.stationTimeZone
+        let today = calendar.startOfDay(for: now)
+        let day: TentReopening.Day = switch calendar.dateComponents([.day], from: today, to: calendar.startOfDay(for: date)).day {
+        case 0: .today
+        case 1: .tomorrow
+        default: .weekday(format.weekday(date))
         }
+        let parts = calendar.dateComponents([.hour, .minute], from: date)
+        return TentReopening(day: day, time: format.time(date),
+                             signTime: String(format: "%02d:%02d", parts.hour ?? 0, parts.minute ?? 0))
     }
 }

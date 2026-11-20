@@ -12,9 +12,11 @@ public struct MapContent: Sendable, Equatable {
 public struct CameraMove: Sendable, Equatable {
     public let id: Int
     public let viewport: MapViewport
-    /// Camera height in metres, when the move restores an earlier camera. A viewport alone is
-    /// re-fitted to the map's shape, which zooms out a little on every layout change.
-    public let distance: Double?
+    /// The zoom of an earlier camera, when the move restores one: its height in metres per point
+    /// of map height. A map of another shape (after rotating) keeps the zoom rather than the camera
+    /// height, which zoomed out about 2× in landscape. A viewport alone is re-fitted to the map's
+    /// shape, which zooms out a little on every layout change.
+    public let zoom: Double?
 }
 
 /// Mapa (Bear note 07, section 5): price pins for the stations in view, loading the provinces the
@@ -44,7 +46,6 @@ public final class MapViewModel {
         didSet {
             guard userLocation != oldValue else { return }
             observe()
-            if let userLocation, let rememberArea { Task { await rememberArea(userLocation) } }
         }
     }
     public private(set) var cameraMove: CameraMove?
@@ -52,7 +53,9 @@ public final class MapViewModel {
     public private(set) var showsUserLocation = false
     /// The last settled viewport. Kept here so the map reopens where it was after a layout change.
     public private(set) var viewport: MapViewport?
-    private var cameraDistance: Double?
+    private var cameraZoom: Double?
+    /// The last move a map has shown, so a map built later doesn't replay it.
+    @ObservationIgnored private var shownMoveID: Int?
     /// Grey "---" pins from the bundled station samples, shown until prices arrive.
     public private(set) var placeholderPins: [StationPin] = []
 
@@ -76,6 +79,7 @@ public final class MapViewModel {
     private let observeNearby: ObserveNearbyStations
     private let refreshPrices: RefreshPrices
     private let resolveProvinces: ResolveProvinces
+    private let resolveArea: ResolveArea
     private let observeConnectivity: ObserveConnectivity
     private let observeSettings: ObserveSettings
     private let updateSettings: UpdateSettings
@@ -86,13 +90,14 @@ public final class MapViewModel {
     private let now: @Sendable () -> Date
 
     public init(observeNearby: ObserveNearbyStations, refreshPrices: RefreshPrices,
-                resolveProvinces: ResolveProvinces, observeConnectivity: ObserveConnectivity,
+                resolveProvinces: ResolveProvinces, resolveArea: ResolveArea, observeConnectivity: ObserveConnectivity,
                 observeSettings: ObserveSettings, updateSettings: UpdateSettings, locateUser: LocateUser,
                 rememberArea: RememberArea? = nil, settleDelay: Duration = .milliseconds(200),
                 now: @escaping @Sendable () -> Date = { .now }) {
         self.observeNearby = observeNearby
         self.refreshPrices = refreshPrices
         self.resolveProvinces = resolveProvinces
+        self.resolveArea = resolveArea
         self.observeConnectivity = observeConnectivity
         self.observeSettings = observeSettings
         self.updateSettings = updateSettings
@@ -124,6 +129,14 @@ public final class MapViewModel {
 
     public var isOfflinePillVisible: Bool { connectivity == .offline && !offlineDismissed }
 
+    /// Where a newly built map opens: a move no map has shown yet (such as "Ver en el mapa" from
+    /// the list), otherwise the last settled camera. Rotating swaps layouts and builds a new map;
+    /// replaying the last move there jumped back to the user's location.
+    public var openingCamera: CameraMove? {
+        guard let cameraMove, cameraMove.id == shownMoveID, let viewport else { return cameraMove }
+        return CameraMove(id: cameraMove.id, viewport: viewport, zoom: cameraZoom)
+    }
+
     // MARK: Intents
 
     /// Runs for as long as the map is on screen (call it from `.task`).
@@ -135,12 +148,10 @@ public final class MapViewModel {
         let settings = await observeSettings.current()
         product = settings.product
         showsUserLocation = await locateUser.status() == .authorized
+        // Back from another layout, the new map already opened where the old one was (`openingCamera`).
         if !hasPlacedCamera {
             hasPlacedCamera = true
             await placeInitialCamera(settings: settings)
-        } else if let viewport {
-            // Back from another layout: resume where the map was.
-            move(to: viewport, distance: cameraDistance)
         }
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.watchConnectivity() }
@@ -155,9 +166,9 @@ public final class MapViewModel {
     /// The camera stopped moving. Regroups the loaded pins for the new zoom at once, and loads
     /// only when the map has left the loaded area, after a short pause so a pan doesn't fire a
     /// request per frame.
-    public func viewportChanged(_ viewport: MapViewport, width: Double, distance: Double? = nil) {
+    public func viewportChanged(_ viewport: MapViewport, width: Double, zoom: Double? = nil) {
         self.viewport = viewport
-        cameraDistance = distance
+        cameraZoom = zoom
         mapWidth = width
         settling?.cancel()
         if !isZoomedOut, let loadedArea, Self.covers(loadedArea, viewport) {
@@ -195,6 +206,7 @@ public final class MapViewModel {
         if userLocation == nil, await locateUser.authorize() == .authorized {
             showsUserLocation = true
             userLocation = await locateUser.firstFix()
+            await remember(userLocation)
         }
         guard let userLocation else { return }
         move(to: MapViewport(center: userLocation, latitudeDelta: Self.initialSpan, longitudeDelta: Self.initialSpan))
@@ -209,6 +221,11 @@ public final class MapViewModel {
         await reload()
     }
 
+    /// A map moved its camera for `move`.
+    public func cameraMoveShown(_ move: CameraMove) {
+        shownMoveID = move.id
+    }
+
     public func dismissOfflinePill() {
         offlineDismissed = true
     }
@@ -218,18 +235,18 @@ public final class MapViewModel {
     private func placeInitialCamera(settings: Settings) async {
         if await locateUser.status() == .authorized, let fix = await locateUser.firstFix() {
             userLocation = fix
+            await remember(fix)
             move(to: MapViewport(center: fix, latitudeDelta: Self.initialSpan, longitudeDelta: Self.initialSpan))
             return
         }
-        let id = settings.defaultProvinceID ?? settings.lastViewedProvinceID ?? StationListViewModel.fallbackProvince
-        guard let province = await resolveProvinces.province(id) else { return }
+        guard case .bounds(let bounds)? = await resolveArea(province: ResolveArea.province(for: settings))?.area else { return }
         // The province's main area rather than its whole outline, so prices are readable at once.
-        move(to: MapViewport(center: province.bounds.center, latitudeDelta: 0.3, longitudeDelta: 0.3))
+        move(to: MapViewport(center: bounds.center, latitudeDelta: 0.3, longitudeDelta: 0.3))
     }
 
-    private func move(to viewport: MapViewport, distance: Double? = nil) {
+    private func move(to viewport: MapViewport) {
         moveCount += 1
-        cameraMove = CameraMove(id: moveCount, viewport: viewport, distance: distance)
+        cameraMove = CameraMove(id: moveCount, viewport: viewport, zoom: nil)
     }
 
     private func load() async {
@@ -340,11 +357,20 @@ public final class MapViewModel {
                 // The first fix came after the map had fallen back to the default province.
                 userLocation = coordinate
                 move(to: MapViewport(center: coordinate, latitudeDelta: Self.initialSpan, longitudeDelta: Self.initialSpan))
+                await remember(coordinate)
                 continue
             }
             // Distances only need refreshing once the user has moved a little.
             guard coordinate.distance(to: current) > 200 else { continue }
             userLocation = coordinate
+            await remember(coordinate)
         }
+    }
+
+    /// Records the position for the widgets and background refresh. Awaited in order, so an older
+    /// position can't be written after a newer one.
+    private func remember(_ location: Coordinate?) async {
+        guard let location, let rememberArea else { return }
+        await rememberArea(location)
     }
 }

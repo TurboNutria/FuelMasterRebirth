@@ -107,6 +107,27 @@ struct MapViewModelTests {
         #expect(harness.viewModel.cameraMove?.viewport.latitudeDelta == MapViewModel.initialSpan)
     }
 
+    @Test func aMapBuiltAfterARotationOpensWhereTheOldOneWas() async throws {
+        let harness = MapHarness(cached: stations)
+        let task = Task { await harness.viewModel.start() }
+        defer { task.cancel() }
+        await harness.waitUntil { $0.cameraMove != nil }
+        harness.viewModel.cameraMoveShown(try #require(harness.viewModel.cameraMove))
+        // The user pans away from their location, then turns the phone.
+        let panned = MapViewport(center: Coordinate(latitude: 41.39, longitude: 2.16), latitudeDelta: 0.05, longitudeDelta: 0.05)
+        harness.viewModel.viewportChanged(panned, width: 390, zoom: 9)
+        #expect(harness.viewModel.openingCamera?.viewport == panned)
+        #expect(harness.viewModel.openingCamera?.zoom == 9)
+    }
+
+    @Test func aMoveNoMapHasShownOpensTheNextMap() {
+        let harness = MapHarness(cached: stations)
+        harness.viewModel.viewportChanged(aroundSol, width: 390)
+        // "Ver en el mapa" from the list, with the map not built yet.
+        harness.viewModel.focus(on: Fixtures.sol)
+        #expect(harness.viewModel.openingCamera?.viewport.latitudeDelta == MapViewModel.focusSpan)
+    }
+
     @Test func aLateFirstFixMovesTheMapFromTheDefaultProvince() async {
         // The fix takes longer than the first-fix wait, so the map opens on the default province first.
         let harness = MapHarness(cached: stations, location: FakeLocation(fix: Fixtures.sol, delay: .milliseconds(300)),

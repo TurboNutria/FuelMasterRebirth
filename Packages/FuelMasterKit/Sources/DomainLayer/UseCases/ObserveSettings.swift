@@ -24,10 +24,9 @@ public struct UpdateSettings: Sendable {
         self.settings = settings
     }
 
-    /// Reads, changes and saves in one step, so callers only describe the change.
+    /// Callers only describe the change; the repository applies it to the latest settings in one
+    /// step, so two changes made at once (a new fuel, a remembered area) both stick.
     public func callAsFunction(_ change: @Sendable (inout Settings) -> Void) async {
-        var current = await settings.current()
-        change(&current)
-        await settings.update(current)
+        await settings.update(change)
     }
 }

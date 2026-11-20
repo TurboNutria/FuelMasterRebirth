@@ -25,6 +25,9 @@ struct StationDetailViewModelTests {
         #expect(chart.history.points.last?.amount == Decimal(string: "1.859"))
         // A flat week still gets a 6-cent tall chart.
         #expect(chart.range.upperBound - chart.range.lowerBound >= 0.06)
+        // Ready to plot: today's price as a number, and the first, middle and last day on the axis.
+        #expect(chart.stationPoints.last?.amount == 1.859)
+        #expect(chart.axisDays == [0, 3, 6].map { chart.history.points[$0].day })
         #expect(!chart.isIncomplete)
         #expect(harness.viewModel.shareURL?.absoluteString.contains("maps.apple.com") == true)
         task.cancel()

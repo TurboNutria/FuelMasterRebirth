@@ -1,3 +1,4 @@
+import DesignTokens
 import DomainLayer
 import SwiftUI
 import ViewModelLayer
@@ -64,20 +65,6 @@ public struct SettingsScreen: View {
             #if os(iOS)
             .toolbarVisibility(.hidden, for: .navigationBar)
             #endif
-        }
-    }
-}
-
-/// "Combustible  Diésel ›" as a menu picker.
-struct FuelPicker: View {
-    let product: Product
-    let onSelect: (Product) -> Void
-
-    var body: some View {
-        Picker(selection: Binding(get: { product }, set: onSelect)) {
-            ForEach(Product.allCases) { Text($0.displayName).tag($0) }
-        } label: {
-            Text("Combustible", bundle: .module)
         }
     }
 }

@@ -1,3 +1,4 @@
+import DesignTokens
 import DomainLayer
 import SwiftUI
 import ViewModelLayer
@@ -25,8 +26,6 @@ struct StationPeek: View {
     let hours: HoursSummary
 
     @Environment(\.displayFormat) private var format
-    @Environment(\.priceScale) private var scale
-    @ScaledMetric(relativeTo: .largeTitle) private var priceSize: CGFloat = 44
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -51,30 +50,11 @@ struct StationPeek: View {
                 .foregroundStyle(ColorTokens.textSecondary)
             }
             .font(.subheadline)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(summary.price.product.displayName)
-                    .font(.subheadline)
-                    .foregroundStyle(ColorTokens.textSecondary)
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text(format.price(summary.price.amount))
-                        .font(.system(size: priceSize, weight: .bold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundStyle(priceColor)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
-                    Text(summary.price.unit == .kilogram ? "€/kg" : "€/l")
-                        .font(.system(.title3, design: .rounded))
-                        .foregroundStyle(ColorTokens.textSecondary)
-                }
-            }
+            PriceHeadline(price: summary.price, level: summary.level)
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(ColorTokens.background)
-    }
-
-    private var priceColor: Color {
-        summary.level == .cheap ? PriceLevelColors.colors(for: .cheap, scale: scale).background : ColorTokens.textPrimary
     }
 
     private var addressLine: String {

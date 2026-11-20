@@ -10,12 +10,13 @@ public struct CompleteOnboarding: Sendable {
 
     /// `defaultProvince` is set when the user picked one instead of sharing their location.
     public func callAsFunction(product: Product, tankSize: Decimal, defaultProvince: ProvinceID?) async {
-        var current = await settings.current()
-        current.product = product
-        current.tankSize = Settings.clampedTankSize(tankSize)
-        if let defaultProvince { current.defaultProvinceID = defaultProvince }
-        current.onboardingCompleted = true
-        await settings.update(current)
+        let tankSize = Settings.clampedTankSize(tankSize)
+        await settings.update { current in
+            current.product = product
+            current.tankSize = tankSize
+            if let defaultProvince { current.defaultProvinceID = defaultProvince }
+            current.onboardingCompleted = true
+        }
     }
 }
 

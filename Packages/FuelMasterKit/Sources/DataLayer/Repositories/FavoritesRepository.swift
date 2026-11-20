@@ -37,7 +37,7 @@ public final class FavoritesRepository: FavoriteStationsRepository {
     public func changes() async -> AsyncStream<[FavoriteEntry]> {
         // iCLOUD: also re-publish when CloudKit merges changes from another device, by observing
         // `NSPersistentStoreRemoteChange` notifications and calling `publish()`.
-        await broadcaster.stream()
+        broadcaster.stream()
     }
 
     public func iCloudStatus() async -> AsyncStream<ICloudStatus> {
@@ -65,7 +65,7 @@ public final class FavoritesRepository: FavoriteStationsRepository {
     // }
 
     private func publish() async {
-        if let entries = try? await store.entries() { await broadcaster.send(entries) }
+        if let entries = try? await store.entries() { broadcaster.send(entries) }
     }
 }
 

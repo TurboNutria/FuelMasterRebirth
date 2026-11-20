@@ -42,7 +42,7 @@ public final class SearchViewModel {
     @ObservationIgnored private var pending: Task<Void, Never>?
 
     private let searchStations: SearchStations
-    private let resolveProvinces: ResolveProvinces
+    private let resolveArea: ResolveArea
     private let toggleFavorite: ToggleFavorite
     private let observeSettings: ObserveSettings
     private let locateUser: LocateUser
@@ -50,11 +50,11 @@ public final class SearchViewModel {
     private let debounce: Duration
     private let now: @Sendable () -> Date
 
-    public init(searchStations: SearchStations, resolveProvinces: ResolveProvinces, toggleFavorite: ToggleFavorite,
+    public init(searchStations: SearchStations, resolveArea: ResolveArea, toggleFavorite: ToggleFavorite,
                 observeSettings: ObserveSettings, locateUser: LocateUser, format: DisplayFormat = DisplayFormat(),
                 debounce: Duration = .milliseconds(300), now: @escaping @Sendable () -> Date = { .now }) {
         self.searchStations = searchStations
-        self.resolveProvinces = resolveProvinces
+        self.resolveArea = resolveArea
         self.toggleFavorite = toggleFavorite
         self.observeSettings = observeSettings
         self.locateUser = locateUser
@@ -110,13 +110,14 @@ public final class SearchViewModel {
     private func locate(settings: Settings) async {
         if await locateUser.status() == .authorized, let fix = await locateUser.firstFix() {
             origin = fix
-            area = await resolveProvinces(around: fix)
+            area = await resolveArea(around: fix).provinces
             areaName = nil
             return
         }
-        let id = settings.defaultProvinceID ?? settings.lastViewedProvinceID ?? StationListViewModel.fallbackProvince
-        area = [id]
-        areaName = await resolveProvinces.province(id)?.name
+        let id = ResolveArea.province(for: settings)
+        let resolved = await resolveArea(province: id)
+        area = resolved?.provinces ?? [id]
+        areaName = resolved?.provinceName
     }
 
     private func schedule(immediately: Bool = false) {

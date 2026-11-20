@@ -101,6 +101,20 @@ public struct DisplayFormat: Sendable {
         return formatter.localizedString(for: reference, relativeTo: now)
     }
 
+    /// "21 oct 2026", in station time: the chart's days for VoiceOver.
+    public func day(_ date: Date, timeZone: TimeZone = HoursText.stationTimeZone) -> String {
+        var style = Date.FormatStyle(date: .abbreviated, time: .omitted, locale: locale)
+        style.timeZone = timeZone
+        return date.formatted(style)
+    }
+
+    /// "martes", in station time.
+    public func weekday(_ date: Date, timeZone: TimeZone = HoursText.stationTimeZone) -> String {
+        var style = Date.FormatStyle(locale: locale).weekday(.wide)
+        style.timeZone = timeZone
+        return date.formatted(style)
+    }
+
     /// "7:30" or "7:30 am", following the locale's (and the device's) 12/24-hour setting.
     public func time(_ date: Date, timeZone: TimeZone = HoursText.stationTimeZone) -> String {
         var style = Date.FormatStyle(date: .omitted, time: .shortened, locale: locale)

@@ -19,10 +19,13 @@ final class AppDependencies {
     let location: LocationRepository
     let connectivity: NetworkConnectivityRepository
     let widgets: WidgetRefresher
+    /// Keeps the watch app's fuel, look, area and favourites in step (Bear note 06).
+    let companion: CompanionSync
 
     let refreshPrices: RefreshPrices
     let backfillHistory: BackfillHistory
     let resolveProvinces: ResolveProvinces
+    let resolveArea: ResolveArea
     let observeNearbyStations: ObserveNearbyStations
     let observeConnectivity: ObserveConnectivity
     let observeSettings: ObserveSettings
@@ -30,6 +33,8 @@ final class AppDependencies {
     let locateUser: LocateUser
     let getStationDetail: GetStationDetail
     let getPriceHistory: GetPriceHistory
+    let getPriceChanges: GetPriceChanges
+    let refreshFavorites: RefreshFavorites
     let toggleFavorite: ToggleFavorite
     let observeFavorites: ObserveFavorites
     let reorderFavorites: ReorderFavorites
@@ -52,10 +57,13 @@ final class AppDependencies {
         location = LocationRepository()
         connectivity = NetworkConnectivityRepository()
         widgets = WidgetRefresher()
+        companion = CompanionSync(session: WatchConnectivitySession(), settings: localData, favorites: favorites,
+                                  defaults: PersistenceFactory.sharedDefaults())
 
         refreshPrices = RefreshPrices(remote: remote, cache: localData, widgets: widgets)
         backfillHistory = BackfillHistory(remote: remote, cache: localData)
         resolveProvinces = ResolveProvinces(provinces: localData)
+        resolveArea = ResolveArea(provinces: localData)
         observeNearbyStations = ObserveNearbyStations(cache: localData, favorites: favorites)
         observeConnectivity = ObserveConnectivity(connectivity: connectivity)
         observeSettings = ObserveSettings(settings: localData)
@@ -63,6 +71,8 @@ final class AppDependencies {
         locateUser = LocateUser(location: location)
         getStationDetail = GetStationDetail(cache: localData, favorites: favorites)
         getPriceHistory = GetPriceHistory(cache: localData, backfill: backfillHistory)
+        getPriceChanges = GetPriceChanges(cache: localData, backfill: backfillHistory)
+        refreshFavorites = RefreshFavorites(refreshPrices: refreshPrices, backfill: backfillHistory)
         toggleFavorite = ToggleFavorite(favorites: favorites)
         observeFavorites = ObserveFavorites(favorites: favorites, cache: localData)
         reorderFavorites = ReorderFavorites(favorites: favorites)
@@ -90,15 +100,14 @@ final class AppDependencies {
                                         resolveProvinces: resolveProvinces, getDataSourceInfo: getDataSourceInfo),
             onboarding: OnboardingViewModel(completeOnboarding: completeOnboarding, resolveProvinces: resolveProvinces,
                                             locateUser: locateUser),
-            tent: TentBoardViewModel(getDetail: getStationDetail, getHistory: getPriceHistory,
-                                     backfillHistory: backfillHistory)
+            tent: TentBoardViewModel(getDetail: getStationDetail, getPriceChanges: getPriceChanges)
         )
     }
 
     /// Created once and kept by the app, so screen state survives layout changes.
     @MainActor func makeStationListViewModel() -> StationListViewModel {
         StationListViewModel(
-            observeNearby: observeNearbyStations, refreshPrices: refreshPrices, resolveProvinces: resolveProvinces,
+            observeNearby: observeNearbyStations, refreshPrices: refreshPrices, resolveArea: resolveArea,
             observeConnectivity: observeConnectivity, observeSettings: observeSettings,
             updateSettings: updateSettings, locateUser: locateUser, toggleFavorite: toggleFavorite,
             rememberArea: rememberArea
@@ -108,7 +117,7 @@ final class AppDependencies {
     @MainActor func makeMapViewModel() -> MapViewModel {
         MapViewModel(
             observeNearby: observeNearbyStations, refreshPrices: refreshPrices, resolveProvinces: resolveProvinces,
-            observeConnectivity: observeConnectivity, observeSettings: observeSettings,
+            resolveArea: resolveArea, observeConnectivity: observeConnectivity, observeSettings: observeSettings,
             updateSettings: updateSettings, locateUser: locateUser, rememberArea: rememberArea
         )
     }
@@ -125,14 +134,14 @@ extension AppDependencies {
     @MainActor func makeFavoritesViewModel() -> FavoritesViewModel {
         FavoritesViewModel(
             observeFavorites: observeFavorites, toggleFavorite: toggleFavorite, reorderFavorites: reorderFavorites,
-            observeICloudStatus: observeICloudStatus, refreshPrices: refreshPrices, backfillHistory: backfillHistory,
+            observeICloudStatus: observeICloudStatus, refreshPrices: refreshPrices, refreshFavorites: refreshFavorites,
             observeSettings: observeSettings, locateUser: locateUser
         )
     }
 
     @MainActor func makeSearchViewModel() -> SearchViewModel {
         SearchViewModel(
-            searchStations: searchStations, resolveProvinces: resolveProvinces, toggleFavorite: toggleFavorite,
+            searchStations: searchStations, resolveArea: resolveArea, toggleFavorite: toggleFavorite,
             observeSettings: observeSettings, locateUser: locateUser
         )
     }

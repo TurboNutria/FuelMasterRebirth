@@ -1,3 +1,4 @@
+import DesignTokens
 import DomainLayer
 import SwiftUI
 import ViewModelLayer
@@ -51,13 +52,13 @@ struct OnboardingPage<Content: View, Buttons: View>: View {
     var body: some View {
         GeometryReader { proxy in
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: Metrics.sectionSpacing) {
                     Spacer(minLength: 0)
                     content
                     Spacer(minLength: 0)
                     VStack(spacing: 8) { buttons }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Metrics.screenMargin)
                 .padding(.top, 24)
                 .padding(.bottom, 16)
                 .frame(maxWidth: .infinity, minHeight: proxy.size.height, alignment: .leading)
@@ -126,7 +127,7 @@ struct WelcomeStep: View {
 
     var body: some View {
         OnboardingPage {
-            VStack(alignment: .leading, spacing: 32) {
+            VStack(alignment: .leading, spacing: Metrics.sectionSpacing) {
                 WelcomePins()
                 OnboardingHeading(title: Text(verbatim: "FuelMaster"),
                                   subtitle: Text("La gasolinera más barata cerca de ti", bundle: .module))
@@ -234,7 +235,7 @@ struct FuelStep: View {
                 OnboardingButton(title: Text("Siguiente", bundle: .module), action: viewModel.next)
                     .padding(.top, 12)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Metrics.screenMargin)
             .padding(.bottom, 16)
         }
     }

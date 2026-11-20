@@ -1,3 +1,4 @@
+import DesignTokens
 import DomainLayer
 import SwiftUI
 import ViewModelLayer
@@ -68,7 +69,11 @@ struct AccentSwatches: View {
                 // The ring's size, so the selected ring lines up with the 20 pt margin.
                 .frame(width: 40, height: 40)
                 .overlay { if choice == selection { ring(for: choice) } }
+                // A 44 pt tap area; the negative padding keeps the ring on the margin.
+                .frame(width: 44, height: 44)
+                .contentShape(.circle)
         }
+        .padding(-2)
         .buttonStyle(.plain)
         .accessibilityLabel(Text(choice.name))
         .accessibilityAddTraits(choice == selection ? .isSelected : [])

@@ -91,7 +91,10 @@ struct FuelMasterApp: App {
                     }
                     #endif
                     self.models = models
-                    await dependencies.reloadWidgetsOnChanges()
+                    // Both run while the window is open: widget reloads and the watch sync.
+                    async let widgets: Void = dependencies.reloadWidgetsOnChanges()
+                    async let watch: Void = dependencies.companion.run()
+                    _ = await (widgets, watch)
                 } catch {
                     startupError = error.localizedDescription
                 }

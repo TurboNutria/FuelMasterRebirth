@@ -1,3 +1,4 @@
+import DesignTokens
 import SwiftUI
 
 /// "Actualizando…" while new prices load over the cache. Never announced: it would be noise
@@ -37,13 +38,18 @@ public struct OfflinePill: View {
             Text(message)
                 .font(.subheadline.weight(.semibold))
             Button(action: onDismiss) {
-                Image(systemName: "xmark")
+                Label { Text("Cerrar aviso", bundle: .module) } icon: { Image(systemName: "xmark") }
+                    .labelStyle(.iconOnly)
                     .font(.caption.weight(.heavy))
                     .frame(width: 26, height: 26)
                     .background(.white.opacity(0.22), in: .circle)
+                    // A 44 pt tap area around the 26 pt circle...
+                    .frame(width: 44, height: 44)
+                    .contentShape(.rect)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(Text("Cerrar aviso", bundle: .module))
+            // ...that reaches past the pill, which keeps its 36 pt height.
+            .padding(-9)
         }
         .foregroundStyle(.white)
         .padding(.leading, 14)

@@ -22,9 +22,8 @@ struct TentBoardViewModelTests {
         let now = self.now
         return TentBoardViewModel(
             getDetail: GetStationDetail(cache: cache, favorites: FakeFavorites(), now: { now }),
-            getHistory: GetPriceHistory(cache: cache, backfill: BackfillHistory(remote: FakeRemote(), cache: cache, now: { now }),
-                                        now: { now }),
-            backfillHistory: BackfillHistory(remote: FakeRemote(), cache: cache, now: { now }),
+            getPriceChanges: GetPriceChanges(cache: cache, backfill: BackfillHistory(remote: FakeRemote(), cache: cache, now: { now }),
+                                             now: { now }),
             format: DisplayFormat(locale: Locale(identifier: "es_ES")),
             now: { now }
         )
@@ -71,6 +70,20 @@ struct TentBoardViewModelTests {
         let content = try #require(board.content)
         #expect(content.isClosed)
         #expect(content.opensAt != nil)
+        #expect(content.reopening?.day == .tomorrow)
+        #expect(content.reopening?.signTime == "06:00")
         task.cancel()
+    }
+
+    @Test func reopeningSaysTodayTomorrowOrTheWeekday() {
+        let format = DisplayFormat(locale: Locale(identifier: "es_ES"))
+        let now = Fixtures.date(2026, 10, 20, 5, 0)                     // a Tuesday, 05:00 in Madrid
+        let today = TentBoardViewModel.reopening(at: Fixtures.date(2026, 10, 20, 7, 30), now: now, format: format)
+        #expect(today.day == .today)
+        #expect(today.signTime == "07:30")
+        let tomorrow = TentBoardViewModel.reopening(at: Fixtures.date(2026, 10, 21, 6, 0), now: now, format: format)
+        #expect(tomorrow.day == .tomorrow)
+        let later = TentBoardViewModel.reopening(at: Fixtures.date(2026, 10, 23, 6, 0), now: now, format: format)
+        #expect(later.day == .weekday("viernes"))
     }
 }

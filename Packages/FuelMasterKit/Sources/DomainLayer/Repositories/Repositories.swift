@@ -36,7 +36,10 @@ public protocol ProvinceRepository: Sendable {
 /// Per-device settings. Implemented by LocalDataRepository.
 public protocol SettingsRepository: Sendable {
     func current() async -> Settings
-    func update(_ settings: Settings) async
+    /// Applies `change` to the latest settings and saves the result in one step, so a change made
+    /// at the same time by another caller is never overwritten. Returns the saved settings.
+    @discardableResult
+    func update(_ change: @Sendable (inout Settings) -> Void) async -> Settings
     func changes() async -> AsyncStream<Settings>
 }
 

@@ -146,11 +146,28 @@ struct LocalStorageTests {
         let repository = LocalDataRepository(container: try! PersistenceFactory.cacheContainer(inMemory: true),
                                              defaults: UserDefaults(suiteName: "tests.\(UUID())")!)
         #expect(await repository.current() == .default)
-        var settings = DomainLayer.Settings.default
-        settings.product = .lng
-        settings.tankSize = 20
-        await repository.update(settings)
+        await repository.update {
+            $0.product = .lng
+            $0.tankSize = 20
+        }
         #expect(await repository.current().product == .lng)
+        #expect(await repository.current().tankSize == 20)
+    }
+
+    /// Changes made at the same time all stick, and the last change published is the saved one.
+    @Test func concurrentSettingsChangesAllStick() async {
+        let repository = LocalDataRepository(container: try! PersistenceFactory.cacheContainer(inMemory: true),
+                                             defaults: UserDefaults(suiteName: "tests.\(UUID())")!)
+        let changes: AsyncStream<DomainLayer.Settings> = await repository.changes()
+        await withTaskGroup(of: Void.self) { group in
+            for _ in 0..<50 {
+                group.addTask { await repository.update { $0.tankSize += 1 } }
+            }
+        }
+        let saved = await repository.current()
+        #expect(saved.tankSize == DomainLayer.Settings.default.tankSize + 50)
+        var iterator = changes.makeAsyncIterator()
+        #expect(await iterator.next() == saved)
     }
 
     @Test func favoritesAreUniqueAndOrdered() async throws {

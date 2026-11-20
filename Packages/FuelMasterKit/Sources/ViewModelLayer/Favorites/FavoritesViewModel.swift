@@ -25,7 +25,9 @@ public struct FavoritesContent: Sendable, Equatable {
 public final class FavoritesViewModel {
     public private(set) var product: Product = .diesel
     public private(set) var iCloudStatus: ICloudStatus = .syncDisabled
-    public private(set) var isRefreshing = false
+    /// True while any refresh runs. A count, so a pull to refresh that overlaps the automatic one
+    /// doesn't clear the flag while the other is still loading.
+    public var isRefreshing: Bool { refreshes > 0 }
 
     private var result: FavoritesResult?
     private var tankSize: Decimal = Settings.default.tankSize
@@ -35,21 +37,27 @@ public final class FavoritesViewModel {
     private var activeRuns = 0
     /// The stale-province refresh and yesterday's prices run once per visit, after the first result.
     private var didRefresh = false
+    private var refreshes = 0
     @ObservationIgnored private var observation: Task<Void, Never>?
+    /// Loading work the favourites stream asks for (the first refresh, missing provinces). It runs
+    /// one job at a time in a task the view model owns, so it stops when Favoritos goes away and
+    /// survives the observation restarting for a new fuel or position.
+    @ObservationIgnored private var followUps: AsyncStream<FollowUp>.Continuation?
+    @ObservationIgnored private var followUpWork: Task<Void, Never>?
 
     private let observeFavorites: ObserveFavorites
     private let toggleFavorite: ToggleFavorite
     private let reorderFavorites: ReorderFavorites
     private let observeICloudStatus: ObserveICloudStatus
     private let refreshPrices: RefreshPrices
-    private let backfillHistory: BackfillHistory
+    private let refreshFavorites: RefreshFavorites
     private let observeSettings: ObserveSettings
     private let locateUser: LocateUser
     private let format: DisplayFormat
     private let now: @Sendable () -> Date
 
     public init(observeFavorites: ObserveFavorites, toggleFavorite: ToggleFavorite, reorderFavorites: ReorderFavorites,
-                observeICloudStatus: ObserveICloudStatus, refreshPrices: RefreshPrices, backfillHistory: BackfillHistory,
+                observeICloudStatus: ObserveICloudStatus, refreshPrices: RefreshPrices, refreshFavorites: RefreshFavorites,
                 observeSettings: ObserveSettings, locateUser: LocateUser,
                 format: DisplayFormat = DisplayFormat(), now: @escaping @Sendable () -> Date = { .now }) {
         self.observeFavorites = observeFavorites
@@ -57,7 +65,7 @@ public final class FavoritesViewModel {
         self.reorderFavorites = reorderFavorites
         self.observeICloudStatus = observeICloudStatus
         self.refreshPrices = refreshPrices
-        self.backfillHistory = backfillHistory
+        self.refreshFavorites = refreshFavorites
         self.observeSettings = observeSettings
         self.locateUser = locateUser
         self.format = format
@@ -84,6 +92,7 @@ public final class FavoritesViewModel {
     /// Runs while Favoritos is on screen. Layout swaps overlap screens, so the last to leave tears down.
     public func start() async {
         activeRuns += 1
+        if activeRuns == 1 { startFollowUps() }
         let settings = await observeSettings.current()
         product = settings.product
         tankSize = settings.tankSize
@@ -96,6 +105,7 @@ public final class FavoritesViewModel {
         activeRuns -= 1
         guard activeRuns == 0 else { return }
         observation?.cancel()
+        stopFollowUps()
         requestedProvinces = []
         didRefresh = false
     }
@@ -103,13 +113,10 @@ public final class FavoritesViewModel {
     /// Refreshes the favourites' stale provinces, then fetches yesterday for "cambio desde ayer".
     public func refresh(force: Bool = false) async {
         guard let provinces = await currentProvinces(), !provinces.isEmpty else { return }
-        isRefreshing = true
-        _ = await refreshPrices(provinces, force: force)
-        isRefreshing = false
+        refreshes += 1
         requestedProvinces.formUnion(provinces)
-        for province in provinces {
-            try? await backfillHistory(province: province, product: product, recentDays: 1)
-        }
+        await refreshFavorites(provinces, product: product, force: force)
+        refreshes -= 1
     }
 
     public func remove(_ id: StationID) async {
@@ -148,9 +155,9 @@ public final class FavoritesViewModel {
                 result = next
                 if !didRefresh {
                     didRefresh = true
-                    Task { await refresh() }
+                    followUps?.yield(.refresh)
                 } else {
-                    Task { await loadMissing(next.missingProvinces) }
+                    followUps?.yield(.loadMissing(next.missingProvinces))
                 }
             }
         }
@@ -161,9 +168,35 @@ public final class FavoritesViewModel {
         let pending = provinces.filter { !requestedProvinces.contains($0) }
         guard !pending.isEmpty else { return }
         requestedProvinces.formUnion(pending)
-        isRefreshing = true
+        refreshes += 1
         _ = await refreshPrices(pending)
-        isRefreshing = false
+        refreshes -= 1
+    }
+
+    private enum FollowUp: Sendable {
+        case refresh
+        case loadMissing([ProvinceID])
+    }
+
+    private func startFollowUps() {
+        let (stream, continuation) = AsyncStream<FollowUp>.makeStream()
+        followUps = continuation
+        followUpWork = Task {
+            for await followUp in stream {
+                guard !Task.isCancelled else { return }
+                switch followUp {
+                case .refresh: await refresh()
+                case .loadMissing(let provinces): await loadMissing(provinces)
+                }
+            }
+        }
+    }
+
+    private func stopFollowUps() {
+        followUps?.finish()
+        followUps = nil
+        followUpWork?.cancel()
+        followUpWork = nil
     }
 
     private func currentProvinces() async -> [ProvinceID]? {
@@ -178,7 +211,7 @@ public final class FavoritesViewModel {
             tankSize = settings.tankSize
             observe()
             if productChanged, let provinces = await currentProvinces() {
-                for province in provinces { try? await backfillHistory(province: province, product: product, recentDays: 1) }
+                await refreshFavorites.fetchYesterday(provinces, product: product)
             }
         }
     }

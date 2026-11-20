@@ -1,8 +1,10 @@
+import DesignTokens
 import SwiftUI
 
 /// Seven-segment LED text, as on a forecourt price sign (canvas: Tent Price Board). Unlit
 /// segments stay faintly visible ("ghost" segments) and lit ones glow. Supports digits, "-", the
-/// letters a sign can spell (A b C d E F H L n o P r t U), ".", ":" and spaces.
+/// letters a sign can spell (A b C d E F H L n O o P r S t U), ".", ":" and spaces. Localised sign
+/// text must stick to these.
 struct SevenSegmentText: View {
     /// One character per glyph. With `smallLast`, the last digit is drawn smaller and raised, the
     /// way signs show the third decimal ("1.45⁹").
@@ -49,7 +51,8 @@ struct SevenSegmentText: View {
             "0": "abcdef", "1": "bc", "2": "abdeg", "3": "abcdg", "4": "bcfg", "5": "acdfg", "6": "acdefg",
             "7": "abc", "8": "abcdefg", "9": "abcdfg", "-": "g",
             "A": "abcefg", "b": "cdefg", "C": "adef", "d": "bcdeg", "E": "adefg", "F": "aefg", "H": "bcefg",
-            "L": "def", "n": "ceg", "o": "cdeg", "P": "abefg", "r": "eg", "t": "defg", "U": "bcdef",
+            "L": "def", "n": "ceg", "O": "abcdef", "o": "cdeg", "P": "abefg", "r": "eg", "S": "acdfg", "t": "defg",
+            "U": "bcdef",
         ]
         return Set(map[character] ?? "")
     }

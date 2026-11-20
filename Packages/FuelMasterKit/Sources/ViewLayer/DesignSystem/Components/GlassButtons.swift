@@ -1,3 +1,4 @@
+import DesignTokens
 import SwiftUI
 
 /// Tinted text for an action on the page (an empty state's "Ver todas"), at least 44 pt tall.

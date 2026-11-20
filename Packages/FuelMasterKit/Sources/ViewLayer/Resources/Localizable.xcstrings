@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
-    "---" : {
-
-    },
     "¿Dónde buscamos?" : {
       "localizations" : {
         "en-GB" : {
@@ -20,26 +17,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Which fuel do you use?"
-          }
-        }
-      }
-    },
-    "%@ bajo la media" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ below average"
-          }
-        }
-      }
-    },
-    "%@ sobre la media" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ above average"
           }
         }
       }
@@ -199,48 +176,6 @@
         }
       }
     },
-    "↑ Cara" : {
-      "comment" : "Widget level tag in tinted and clear modes",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "↑ Expensive"
-          }
-        }
-      }
-    },
-    "↓ Barata" : {
-      "comment" : "Widget level tag in tinted and clear modes",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "↓ Cheap"
-          }
-        }
-      }
-    },
-    "€/kg" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "€/kg"
-          }
-        }
-      }
-    },
-    "€/l" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "€/l"
-          }
-        }
-      }
-    },
     "24 h" : {
       "comment" : "Open all day, short",
       "localizations" : {
@@ -310,6 +245,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Open, closes at %@"
+          }
+        }
+      }
+    },
+    "AbrE %@" : {
+      "comment" : "Seven-segment sign with a 24-hour time. Only 0-9 A b C d E F H L n O o P r S t U and spaces",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OPEn %@"
           }
         }
       }
@@ -390,16 +336,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Updating…"
-          }
-        }
-      }
-    },
-    "AdBlue" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AdBlue"
           }
         }
       }
@@ -494,17 +430,6 @@
         }
       }
     },
-    "barata" : {
-      "comment" : "Price level, read inside a sentence",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "cheap"
-          }
-        }
-      }
-    },
     "Baratas" : {
       "localizations" : {
         "en-GB" : {
@@ -576,17 +501,6 @@
         }
       }
     },
-    "cara" : {
-      "comment" : "Price level, read inside a sentence",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "expensive"
-          }
-        }
-      }
-    },
     "Caras" : {
       "localizations" : {
         "en-GB" : {
@@ -643,6 +557,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Closed"
+          }
+        }
+      }
+    },
+    "CErrAdA" : {
+      "comment" : "Seven-segment sign. Only 0-9 A b C d E F H L n O o P r S t U and spaces",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CLOSEd"
           }
         }
       }
@@ -818,6 +743,7 @@
       }
     },
     "Diésel" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en-GB" : {
           "stringUnit" : {
@@ -828,21 +754,12 @@
       }
     },
     "Diésel Premium" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Premium diesel"
-          }
-        }
-      }
-    },
-    "Diésel renovable (HVO)" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Renewable diesel (HVO)"
           }
         }
       }
@@ -894,16 +811,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "In %@"
-          }
-        }
-      }
-    },
-    "En la media" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "At the average"
           }
         }
       }
@@ -1008,16 +915,6 @@
         }
       }
     },
-    "Gasolina 95" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Petrol 95"
-          }
-        }
-      }
-    },
     "Gasolina 95 E10" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1025,26 +922,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Petrol 95 E10"
-          }
-        }
-      }
-    },
-    "Gasolina 95 Premium" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Premium petrol 95"
-          }
-        }
-      }
-    },
-    "Gasolina 98" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Petrol 98"
           }
         }
       }
@@ -1091,62 +968,12 @@
         }
       }
     },
-    "GLP" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LPG"
-          }
-        }
-      }
-    },
-    "GNC" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CNG"
-          }
-        }
-      }
-    },
-    "GNL" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LNG"
-          }
-        }
-      }
-    },
     "Grafito" : {
       "localizations" : {
         "en-GB" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Graphite"
-          }
-        }
-      }
-    },
-    "Ha bajado %@ desde ayer" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Down %@ since yesterday"
-          }
-        }
-      }
-    },
-    "Ha subido %@ desde ayer" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Up %@ since yesterday"
           }
         }
       }
@@ -1197,16 +1024,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Language"
-          }
-        }
-      }
-    },
-    "Igual que ayer" : {
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Same as yesterday"
           }
         }
       }
@@ -1429,17 +1246,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Highest"
-          }
-        }
-      }
-    },
-    "media" : {
-      "comment" : "Price level, read inside a sentence",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "average"
           }
         }
       }
@@ -1873,17 +1679,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No accounts or ads"
-          }
-        }
-      }
-    },
-    "Sin precios" : {
-      "comment" : "Widget: nothing cached yet for the area",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No prices"
           }
         }
       }
